@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kartavya Nirwel — DevSecOps Engineer in the Making</title>
+<meta name="description" content="Kartavya Nirwel — DevSecOps Engineer in the Making. Java/Spring Boot, Docker, Kubernetes, Jenkins, ArgoCD, Terraform, AWS Certified.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#5aa7dd; --sky-bot:#bfe6f7;
+  --grass:#6aab3a; --grass-dark:#4f8a2a; --dirt:#7a5230; --dirt-dark:#5c3d22;
+  --stone:#3a3a3e; --stone-dark:#232326; --deepslate:#232228; --deepslate2:#18171c;
+  --slot-fill:#8b8b8b; --slot-fill-dark:#6e6e6e;
+  --panel:#2b2a30; --panel2:#332f3c;
+  --white:#f4f4f4; --hi:#ffffff88; --sh:#00000066;
+  --gold:#ffd93d; --emerald:#3fd67a; --diamond:#55e6e6; --redstone:#ff5b4d; --lapis:#3b6fd6;
+  --epic:#c964e8; --rare:#55e6e6; --uncommon:#ffd93d; --common:#e6e6e6;
+  --text:#eceaf2; --text-dim:#b7b3c4; --text-dim2:#847e97;
+  --nether:#3a0d5c; --nether2:#1a0430; --portal:#b060ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{max-width:100%;overflow-x:hidden}
+body{
+  font-family:'DM Sans',sans-serif; background:var(--deepslate2); color:var(--text);
+  image-rendering:pixelated;
+}
+.blocky{font-family:'Press Start 2P',cursive}
+h1,h2,h3,.section-eyebrow,.mc-btn,.slot-label,.hotbar-key,.toast-title,.chest-diff,.splash{font-family:'Press Start 2P',cursive}
+
+/* ===== Minecraft-style bevel utilities ===== */
+.bevel-out{
+  border-top:4px solid var(--hi);
+  border-left:4px solid var(--hi);
+  border-right:4px solid var(--sh);
+  border-bottom:4px solid var(--sh);
+  background:var(--slot-fill);
+}
+.bevel-in{
+  border-top:4px solid var(--sh);
+  border-left:4px solid var(--sh);
+  border-right:4px solid var(--hi);
+  border-bottom:4px solid var(--hi);
+  background:#4b4b4f;
+}
+.panel-block{
+  background:var(--panel);
+  border-top:4px solid #4a4656;
+  border-left:4px solid #4a4656;
+  border-right:4px solid #100e16;
+  border-bottom:4px solid #100e16;
+}
+
+::selection{ background:var(--portal); color:#fff; }
+
+/* ===== NAV / HOTBAR ===== */
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 26px; background:rgba(24,23,28,0.92); border-bottom:4px solid var(--deepslate);
+  backdrop-filter:blur(4px);
+}
+.brand{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.brand-slot{
+  width:34px;height:34px; display:flex;align-items:center;justify-content:center;
+  font-size:16px; border-radius:2px;
+}
+.brand-name{ font-size:11px; color:var(--gold); letter-spacing:0.5px; }
+.brand-sub{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim2); margin-top:2px; }
+
+.hotbar{ display:flex; gap:6px; list-style:none; }
+.hotbar a{
+  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  width:52px; height:44px; text-decoration:none; color:var(--text); font-size:16px;
+}
+.hotbar-key{ position:absolute; top:2px; left:4px; font-size:7px; color:var(--text-dim2); }
+.hotbar a:hover, .hotbar a.active{ filter:brightness(1.25); }
+.hotbar a.active{ border-color:var(--gold) !important; }
+
+.mc-btn{
+  display:inline-flex; align-items:center; gap:8px; font-size:10px; padding:11px 16px;
+  color:#222; text-decoration:none; transition:transform .05s;
+  background:var(--emerald);
+}
+.mc-btn:active{ transform:translateY(1px); }
+.mc-btn.gold{ background:var(--gold); }
+.mc-btn.small{ padding:8px 12px; font-size:9px; }
+.mc-btn.full{ width:100%; justify-content:center; }
+
+.nav-toggle{
+  display:none; width:42px; height:42px; align-items:center; justify-content:center;
+  font-size:16px; color:var(--gold); flex-shrink:0;
+}
+.mobile-menu{
+  display:none; position:fixed; inset:0; z-index:190; background:var(--deepslate2);
+  flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.mobile-menu.open{ opacity:1; pointer-events:auto; }
+.mobile-menu .mm-title{ font-size:13px; color:var(--gold); margin-bottom:22px; letter-spacing:1px; }
+.mobile-menu a{ font-family:'Press Start 2P',cursive; font-size:14px; color:var(--text); text-decoration:none; padding:14px 0; display:flex; align-items:center; gap:12px; }
+.mobile-menu a .mi{ font-size:18px; }
+.mobile-menu a:active{ color:var(--gold); }
+.mobile-menu .mm-cta{ margin-top:22px; }
+
+/* ===== SECTIONS ===== */
+section{ padding:90px 28px; position:relative; max-width:1280px; margin:0 auto; }
+.section-eyebrow{ font-size:10.5px; color:var(--gold); letter-spacing:1px; margin-bottom:18px; }
+.section-title{ font-size:clamp(19px,3.6vw,32px); line-height:1.6; color:var(--white); margin-bottom:48px; text-shadow:3px 3px 0 var(--sh); }
+
+/* ===== HERO — OVERWORLD ===== */
+#hero{
+  min-height:100vh; position:relative; overflow:hidden; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:130px 22px 0;
+  background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bot) 65%, var(--sky-bot) 100%);
+}
+.pixel-sun{
+  position:absolute; top:70px; right:60px; width:70px; height:70px; background:#fff6a0;
+  box-shadow:0 0 0 8px #ffffff55; z-index:1;
+}
+.cloud{ position:absolute; background:#ffffffcc; z-index:1; }
+.cloud::before, .cloud::after{ content:''; position:absolute; background:#ffffffcc; }
+.c1{ width:90px; height:26px; top:110px; left:8%; }
+.c1::before{ width:40px; height:20px; top:-14px; left:14px; }
+.c2{ width:70px; height:20px; top:200px; right:20%; }
+.c2::before{ width:34px; height:16px; top:-12px; left:16px; }
+.c3{ width:60px; height:18px; top:150px; left:38%; }
+
+.hero-inner{ position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; }
+.avatar-slot{
+  width:76px; height:76px; display:flex; align-items:center; justify-content:center; font-size:34px;
+  margin-bottom:22px;
+}
+.hero-title{
+  font-size:clamp(24px,6vw,46px); color:#3d3d3d; letter-spacing:2px; line-height:1.5;
+  text-shadow:3px 3px 0 #ffffffaa, 5px 5px 0 rgba(0,0,0,0.25);
+  position:relative;
+}
+.splash{
+  position:absolute; top:-26px; right:-40px; font-size:9px; color:var(--redstone); transform:rotate(-14deg);
+  animation:bounce 1.4s ease-in-out infinite; text-shadow:2px 2px 0 #fff;
+}
+@keyframes bounce{ 0%,100%{ transform:rotate(-14deg) scale(1); } 50%{ transform:rotate(-14deg) scale(1.12); } }
+.hero-tag{ font-size:12px; color:#2c2c2c; letter-spacing:0.5px; margin-top:20px; margin-bottom:22px; }
+.hero-desc{
+  font-family:'JetBrains Mono',monospace; font-size:14.5px; line-height:1.8; color:#2f2f2f;
+  max-width:600px; margin-bottom:30px; background:rgba(255,255,255,0.35); padding:16px 20px;
+}
+.hero-desc b{ color:var(--nether); }
+.hero-actions{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:34px; }
+.hero-coins{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:20px; }
+.coin-chip{
+  display:flex; align-items:center; gap:8px; padding:10px 16px;
+  font-family:'JetBrains Mono',monospace; font-size:13px; color:#2c2c2c; background:rgba(255,255,255,0.55);
+}
+.coin-chip b{ font-family:'Press Start 2P',cursive; font-size:12px; color:var(--nether); }
+
+.ground{ position:relative; z-index:2; width:100%; margin-top:auto; }
+.ground-grass{ height:26px; background:repeating-linear-gradient(90deg, var(--grass) 0 20px, var(--grass-dark) 20px 22px); }
+.ground-dirt{ height:44px; background:repeating-linear-gradient(90deg, var(--dirt) 0 20px, var(--dirt-dark) 20px 22px); }
+.scroll-hint{ position:relative; z-index:3; font-family:'JetBrains Mono',monospace; font-size:13px; color:#2c2c2c; margin-bottom:14px; animation:blink 1.3s step-end infinite; }
+@keyframes blink{ 50%{ opacity:0.25; } }
+
+/* ===== CRAFTING (pipeline) ===== */
+#pipeline{ background:var(--stone-dark); }
+.craft-desc{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:14px; max-width:620px; margin-top:-28px; margin-bottom:44px; line-height:1.7; }
+.craft-layout{ display:flex; align-items:center; gap:36px; flex-wrap:wrap; justify-content:center; }
+.craft-grid{ display:grid; grid-template-columns:repeat(3,74px); grid-template-rows:repeat(3,74px); gap:8px; padding:16px; }
+.craft-slot{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  font-size:24px; position:relative; cursor:default;
+}
+.craft-slot .slot-label{ font-size:6px; color:var(--text-dim2); position:absolute; bottom:4px; left:0; right:0; text-align:center; }
+.craft-slot:hover .slot-tip{ display:block; }
+.slot-tip{
+  display:none; position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
+  background:var(--nether2); border:2px solid var(--portal); padding:8px 12px; white-space:nowrap; z-index:5;
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--diamond);
+}
+.craft-arrow{ font-size:34px; color:var(--text-dim2); }
+.craft-output{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+.craft-output .out-slot{ width:88px; height:88px; display:flex; align-items:center; justify-content:center; font-size:36px; }
+.craft-output .out-label{ font-family:'Press Start 2P',cursive; font-size:9px; color:var(--emerald); text-align:center; max-width:160px; line-height:1.6; }
+.craft-legend{ display:flex; gap:22px; flex-wrap:wrap; margin-top:40px; padding-top:20px; border-top:2px dashed #444; }
+.legend-item{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); }
+.legend-dot{ width:10px; height:10px; }
+
+/* ===== STATS (about) ===== */
+#about{ background:var(--deepslate); }
+.stats-layout{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:40px; align-items:start; }
+.stats-card{ padding:26px; }
+.stats-head{ display:flex; align-items:center; gap:16px; margin-bottom:20px; padding-bottom:16px; border-bottom:2px dashed #4a4656; }
+.stats-portrait{ width:52px; height:52px; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.stats-name{ font-size:12px; color:var(--gold); margin-bottom:8px; }
+.stats-class{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--diamond); }
+.stat-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.stat-tag{ font-size:9.5px; color:var(--text-dim); width:82px; flex-shrink:0; font-family:'Press Start 2P',cursive; }
+.stat-hearts{ display:flex; gap:3px; flex:1; }
+.heart-seg{ flex:1; height:14px; background:#4b4b4f; border:2px solid #222; }
+.heart-seg.on{ background:var(--redstone); }
+.heart-seg.on.xp{ background:var(--emerald); }
+.heart-seg.on.cloud{ background:var(--diamond); }
+.heart-seg.on.gold{ background:var(--gold); }
+.heart-seg.on.purple{ background:var(--epic); }
+
+.about-text p{ font-family:'JetBrains Mono',monospace; font-size:14.5px; color:var(--text-dim); line-height:1.85; margin-bottom:18px; }
+.about-text p b{ color:var(--diamond); }
+.log-book{ margin-top:24px; padding:20px; }
+.log-book h4{ font-size:9.5px; color:var(--gold); margin-bottom:14px; }
+.log-item{ display:flex; gap:10px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); padding:8px 0; border-bottom:1px dashed #3a3742; }
+.log-item:last-child{ border-bottom:none; }
+.log-item span{ color:var(--gold); flex-shrink:0; }
+
+/* ===== SKILLS — INVENTORY ===== */
+#skills{ background:var(--stone-dark); }
+.inv-group{ margin-bottom:30px; }
+.inv-group-title{ font-size:10px; color:var(--portal); letter-spacing:0.5px; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+.inv-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.inv-slot{
+  width:64px; height:64px; display:flex; align-items:center; justify-content:center;
+  font-size:22px; position:relative; flex-shrink:0;
+}
+.inv-slot:hover .inv-tip{ display:block; }
+.inv-tip{
+  display:none; position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
+  background:var(--nether2); border:2px solid var(--portal); padding:8px 12px; white-space:nowrap; z-index:5;
+  font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text);
+}
+
+/* ===== ACHIEVEMENTS — toasts ===== */
+#certifications{ background:var(--deepslate); }
+.toast-stack{ display:flex; flex-direction:column; gap:14px; max-width:560px; }
+.toast{ display:flex; align-items:center; gap:16px; padding:16px 20px; background:rgba(20,18,26,0.9); border-left:6px solid var(--gold); }
+.toast-icon{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.toast-title{ font-size:8px; color:var(--gold); margin-bottom:6px; letter-spacing:0.5px; }
+.toast-name{ font-family:'JetBrains Mono',monospace; font-size:14.5px; color:var(--white); font-weight:700; margin-bottom:3px; }
+.toast-issuer{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--diamond); }
+
+/* ===== PROJECTS — LOOT CHESTS ===== */
+#projects{ background:var(--stone-dark); }
+.chest-feat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-bottom:18px; }
+.chest-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.chest-card{
+  padding:22px; display:flex; flex-direction:column; gap:12px; text-decoration:none; color:inherit;
+  position:relative; transition:transform .12s;
+}
+.chest-card:hover{ transform:translateY(-4px); }
+.chest-card.legendary{ position:relative; overflow:hidden; }
+.chest-card.legendary::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+  background-size:250% 250%; animation:glint 3.5s linear infinite;
+}
+@keyframes glint{ 0%{ background-position:200% 200%; } 100%{ background-position:-50% -50%; } }
+.chest-head{ display:flex; align-items:center; justify-content:space-between; }
+.chest-icon{ font-size:22px; }
+.chest-diff{ font-size:8px; padding:5px 8px; color:#111; }
+.chest-diff.common{ background:var(--common); }
+.chest-diff.rare{ background:var(--rare); color:#111; }
+.chest-diff.epic{ background:var(--epic); color:#fff; }
+.chest-diff.legendary{ background:var(--gold); color:#111; }
+.chest-name{ font-size:13.5px; line-height:1.4; }
+.chest-name.n-common{ color:var(--common); }
+.chest-name.n-rare{ color:var(--rare); }
+.chest-name.n-epic{ color:var(--epic); }
+.chest-name.n-legendary{ color:var(--gold); }
+.chest-desc{ font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--text-dim); line-height:1.6; flex:1; }
+.chest-loot{ display:flex; flex-wrap:wrap; gap:6px; }
+.loot-tag{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--emerald); background:#1c1c1e; border:1px solid var(--emerald); padding:3px 8px; }
+.chest-open{ margin-top:6px; align-self:flex-start; }
+.projects-cta{ display:flex; justify-content:center; margin-top:40px; }
+
+/* ===== CONTACT — NETHER PORTAL ===== */
+#contact{
+  background:radial-gradient(ellipse at 50% 20%, var(--nether) 0%, var(--nether2) 55%, #0c0212 100%);
+}
+.portal-layout{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; }
+.portal-title{ font-size:clamp(18px,3vw,28px); line-height:1.7; color:var(--white); margin-bottom:20px; text-shadow:3px 3px 0 #000; }
+.portal-title span{ color:var(--portal); }
+.portal-sub{ font-family:'JetBrains Mono',monospace; font-size:14px; color:#cbb8e8; line-height:1.7; margin-bottom:28px; }
+.portal-links{ display:flex; flex-direction:column; gap:12px; }
+.portal-link{ display:flex; align-items:center; gap:14px; padding:15px 18px; text-decoration:none; color:#d8cdec; transition:transform .12s; background:rgba(0,0,0,0.35); border:2px solid #4a2a70; }
+.portal-link:hover{ transform:translateX(4px); border-color:var(--portal); color:#fff; }
+.portal-link-icon{ width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:15px; background:#1a0a2a; flex-shrink:0; }
+.portal-link-label{ font-family:'Press Start 2P',cursive; font-size:7.5px; color:#8f6ab8; margin-bottom:4px; }
+.portal-link-value{ font-family:'JetBrains Mono',monospace; font-size:13.5px; overflow-wrap:anywhere; }
+
+.portal-frame{
+  position:relative; aspect-ratio:1/1.35; max-width:340px; margin:0 auto; padding:18px;
+  background:repeating-conic-gradient(#0e0511 0% 25%, #150a1c 0% 50%) 0/16px 16px;
+}
+.portal-inner{
+  position:absolute; inset:22px; overflow:hidden;
+  background:linear-gradient(160deg, #4a0fae, #9b3ff0, #4a0fae);
+  background-size:200% 200%; animation:swirl 4s ease infinite;
+}
+@keyframes swirl{ 0%,100%{ background-position:0% 0%; } 50%{ background-position:100% 100%; } }
+.portal-inner::before{
+  content:'⛏️'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:38px; opacity:0.85; filter:drop-shadow(0 0 12px #fff);
+}
+.party-badge{ display:inline-flex; align-items:center; gap:8px; font-size:9px; color:#111; background:var(--emerald); padding:6px 12px; margin-bottom:20px; }
+
+/* ===== FOOTER ===== */
+footer{
+  background:#0c0212; border-top:4px solid var(--nether); padding:28px 22px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
+}
+.footer-copy{ font-family:'JetBrains Mono',monospace; font-size:12px; color:#7c6a94; }
+.footer-copy span{ color:var(--gold); }
+.footer-links{ display:flex; gap:20px; }
+.footer-links a{ font-size:9px; color:#7c6a94; text-decoration:none; font-family:'Press Start 2P',cursive; }
+.footer-links a:hover{ color:var(--diamond); }
+
+/* reveal */
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity .55s ease, transform .55s ease; }
+.reveal.visible{ opacity:1; transform:translateY(0); }
+.d1{ transition-delay:.08s; } .d2{ transition-delay:.16s; } .d3{ transition-delay:.24s; }
+
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1080px){
+  .stats-layout, .portal-layout{ grid-template-columns:1fr; }
+  .portal-layout{ text-align:center; }
+  .portal-links{ align-items:center; }
+  .portal-link{ width:100%; max-width:380px; }
+}
+@media (max-width:860px){
+  .chest-feat-grid, .chest-grid{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:768px){
+  .hotbar, nav > .mc-btn{ display:none; }
+  .nav-toggle{ display:flex; }
+  .mobile-menu{ display:flex; }
+  section{ padding:60px 18px; }
+  #hero{ padding:110px 16px 0; min-height:unset; }
+  .hero-desc{ font-size:13px; }
+  .hero-actions a{ flex:1 1 auto; justify-content:center; }
+  .craft-grid{ grid-template-columns:repeat(3,60px); grid-template-rows:repeat(3,60px); gap:6px; }
+  .craft-slot{ font-size:19px; }
+  .craft-layout{ gap:20px; }
+  .inv-slot{ width:56px; height:56px; font-size:19px; }
+  .chest-feat-grid, .chest-grid{ grid-template-columns:1fr; }
+  .stat-tag{ width:64px; font-size:8px; }
+  footer{ flex-direction:column; text-align:center; }
+  .footer-links{ justify-content:center; flex-wrap:wrap; }
+  .pixel-sun{ width:48px; height:48px; top:90px; right:24px; }
+}
+@media (max-width:420px){
+  .craft-grid{ grid-template-columns:repeat(3,50px); grid-template-rows:repeat(3,50px); }
+  .craft-slot{ font-size:16px; }
+  .craft-output .out-slot{ width:66px; height:66px; font-size:26px; }
+  .hero-title{ letter-spacing:1px; }
+}
+@media (pointer:coarse){
+  a, button{ -webkit-tap-highlight-color:rgba(255,217,61,0.25); }
+  .footer-links a, .portal-link, .mc-btn{ min-height:40px; }
+  .craft-slot .slot-tip, .inv-slot .inv-tip{ display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV / HOTBAR -->
+<nav>
+  <a href="#hero" class="brand">
+    <div class="brand-slot bevel-out">⛏️</div>
+    <div>
+      <div class="brand-name">KARTAVYA</div>
+      <div class="brand-sub">DevSecOps.exe</div>
+    </div>
+  </a>
+  <ul class="hotbar">
+    <li><a href="#pipeline" class="bevel-out"><span class="hotbar-key">1</span>🔄</a></li>
+    <li><a href="#about" class="bevel-out"><span class="hotbar-key">2</span>📖</a></li>
+    <li><a href="#skills" class="bevel-out"><span class="hotbar-key">3</span>🎒</a></li>
+    <li><a href="#certifications" class="bevel-out"><span class="hotbar-key">4</span>🏆</a></li>
+    <li><a href="#projects" class="bevel-out"><span class="hotbar-key">5</span>📦</a></li>
+    <li><a href="#contact" class="bevel-out"><span class="hotbar-key">6</span>🌀</a></li>
+  </ul>
+  <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="mc-btn gold">RESUME</a>
+  <button class="nav-toggle bevel-out" id="navToggle" aria-label="inventory" aria-expanded="false">E</button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mm-title">— INVENTORY —</div>
+  <a href="#pipeline"><span class="mi">🔄</span>PIPELINE</a>
+  <a href="#about"><span class="mi">📖</span>STATS</a>
+  <a href="#skills"><span class="mi">🎒</span>SKILLS</a>
+  <a href="#certifications"><span class="mi">🏆</span>TROPHIES</a>
+  <a href="#projects"><span class="mi">📦</span>PROJECTS</a>
+  <a href="#contact"><span class="mi">🌀</span>CONTACT</a>
+  <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="mc-btn gold mm-cta">RESUME</a>
+</div>
+
+<!-- HERO — OVERWORLD -->
+<section id="hero">
+  <div class="pixel-sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+
+  <div class="hero-inner">
+    <div class="avatar-slot bevel-out">⛏️</div>
+    <h1 class="hero-title">
+      KARTAVYA NIRWEL
+      <span class="splash">100% Deployed!</span>
+    </h1>
+    <div class="hero-tag">▸ DEVSECOPS ENGINEER IN THE MAKING ◂</div>
+    <p class="hero-desc">
+      Final-year CS student building real pipelines, not just diagrams of them. <b>Java/Spring Boot</b> foundations,
+      <b>Docker → Kubernetes</b> runtime, <b>Jenkins → ArgoCD</b> GitOps delivery, <b>Terraform on AWS</b> underneath it all.
+    </p>
+    <div class="hero-actions">
+      <a href="#pipeline" class="mc-btn gold">⛏ CRAFT THE PIPELINE</a>
+      <a href="#projects" class="mc-btn">📦 OPEN PROJECT CHESTS</a>
+    </div>
+    <div class="hero-coins">
+      <div class="coin-chip"><b>15+</b> repos mined</div>
+      <div class="coin-chip"><b>2×</b> AWS certified</div>
+      <div class="coin-chip"><b>4+</b> pipelines shipped</div>
+    </div>
+    <div class="scroll-hint">▼ scroll down to keep mining ▼</div>
+  </div>
+
+  <div class="ground">
+    <div class="ground-grass"></div>
+    <div class="ground-dirt"></div>
+  </div>
+</section>
+
+<!-- CRAFTING TABLE — PIPELINE -->
+<section id="pipeline">
+  <div class="section-eyebrow">// CRAFTING TABLE</div>
+  <h2 class="section-title">Recipe: DevSecOps Pipeline</h2>
+  <p class="craft-desc">This is the exact recipe behind DevHub 2.0 — every commit is crafted through these ingredients before the output ships.</p>
+
+  <div class="craft-layout reveal">
+    <div class="craft-grid">
+      <div class="craft-slot bevel-in">📝<span class="slot-label">COMMIT</span><span class="slot-tip">Git · GitHub</span></div>
+      <div class="craft-slot bevel-in">🔧<span class="slot-label">BUILD</span><span class="slot-tip">Jenkins</span></div>
+      <div class="craft-slot bevel-in">🛡️<span class="slot-label">SAST</span><span class="slot-tip">SonarQube Quality Gate</span></div>
+      <div class="craft-slot bevel-in">📦<span class="slot-label">SCA</span><span class="slot-tip">OWASP Dependency-Check</span></div>
+      <div class="craft-slot bevel-in">🔍<span class="slot-label">SCAN</span><span class="slot-tip">Trivy container scan</span></div>
+      <div class="craft-slot bevel-in">🚚<span class="slot-label">PUSH</span><span class="slot-tip">Docker registry</span></div>
+      <div class="craft-slot bevel-in">🔄<span class="slot-label">SYNC</span><span class="slot-tip">ArgoCD GitOps</span></div>
+      <div class="craft-slot bevel-in">📊<span class="slot-label">OBSERVE</span><span class="slot-tip">Prometheus·Grafana·Loki·Tempo</span></div>
+      <div class="craft-slot bevel-in" style="opacity:0.3">⬛<span class="slot-label">DAST — pending</span></div>
+    </div>
+
+    <div class="craft-arrow">➜</div>
+
+    <div class="craft-output">
+      <div class="out-slot bevel-out">✅</div>
+      <div class="out-label">DEPLOYED · HEALTHY · OBSERVED</div>
+    </div>
+  </div>
+
+  <div class="craft-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div> Crafted & enforced before merge</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> DAST (OWASP ZAP) — parked on a jenkins-user permissions bug</div>
+  </div>
+</section>
+
+<!-- STATS BOOK — ABOUT -->
+<section id="about">
+  <div class="section-eyebrow">// STATS BOOK</div>
+  <h2 class="section-title">Player Stats</h2>
+
+  <div class="stats-layout">
+    <div class="stats-card panel-block reveal">
+      <div class="stats-head">
+        <div class="stats-portrait bevel-out">🧑‍💻</div>
+        <div>
+          <div class="stats-name">KARTAVYA NIRWEL</div>
+          <div class="stats-class">CLASS: DevSecOps Engineer</div>
+        </div>
+      </div>
+
+      <div class="stat-row"><div class="stat-tag">BACKEND</div><div class="stat-hearts">
+        <div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg"></div>
+      </div></div>
+      <div class="stat-row"><div class="stat-tag">K8s/OPS</div><div class="stat-hearts">
+        <div class="heart-seg on xp"></div><div class="heart-seg on xp"></div><div class="heart-seg on xp"></div><div class="heart-seg"></div><div class="heart-seg"></div>
+      </div></div>
+      <div class="stat-row"><div class="stat-tag">SECURITY</div><div class="stat-hearts">
+        <div class="heart-seg on cloud"></div><div class="heart-seg on cloud"></div><div class="heart-seg on cloud"></div><div class="heart-seg"></div><div class="heart-seg"></div>
+      </div></div>
+      <div class="stat-row"><div class="stat-tag">CLOUD/IaC</div><div class="stat-hearts">
+        <div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg"></div>
+      </div></div>
+      <div class="stat-row"><div class="stat-tag">OBSERVE</div><div class="stat-hearts">
+        <div class="heart-seg on purple"></div><div class="heart-seg on purple"></div><div class="heart-seg"></div><div class="heart-seg"></div><div class="heart-seg"></div>
+      </div></div>
+
+      <div class="log-book bevel-in">
+        <h4>QUEST LOG</h4>
+        <div class="log-item"><span>▸</span> Final-year B.Tech CS, Acropolis Institute of Technology & Research, Indore (2023–2027)</div>
+        <div class="log-item"><span>▸</span> Grinding campus placements — DevOps/DevSecOps roles</div>
+        <div class="log-item"><span>▸</span> Next boss fight: DAST (OWASP ZAP) permissions bug</div>
+      </div>
+    </div>
+
+    <div class="about-text reveal d1">
+      <p>I started as a <b>Java/Spring Boot developer</b> — still my main tool — but the last stretch of this run has been about everything after the code is written: build it, scan it, ship it, watch it, without a human babysitting every step.</p>
+      <p>That means writing my own <b>Kubernetes manifests</b> instead of copy-pasting tutorials, wiring a full <b>Jenkins → ArgoCD GitOps pipeline</b> end to end, and mining through real cluster bugs — NodePort ranges, CrashLoopBackOffs, selector mismatches — until the health check actually turns green.</p>
+      <p>Loot acquired: <b>AWS Certified Solutions Architect – Associate</b> + <b>AWS Certified Cloud Practitioner</b>. Currently side-questing through Terraform, Vault, and the LGTM observability stack.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INVENTORY — SKILLS -->
+<section id="skills">
+  <div class="section-eyebrow">// INVENTORY</div>
+  <h2 class="section-title">Skills Inventory</h2>
+
+  <div class="inv-group reveal">
+    <div class="inv-group-title">🔄 CI/CD & GITOPS</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">🧩<span class="inv-tip">Jenkins</span></div>
+      <div class="inv-slot bevel-in">🔁<span class="inv-tip">ArgoCD</span></div>
+      <div class="inv-slot bevel-in">📚<span class="inv-tip">App-of-Apps pattern</span></div>
+      <div class="inv-slot bevel-in">🪝<span class="inv-tip">Webhooks</span></div>
+    </div>
+  </div>
+
+  <div class="inv-group reveal d1">
+    <div class="inv-group-title">🐳 CONTAINERS & ORCHESTRATION</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">🐋<span class="inv-tip">Docker</span></div>
+      <div class="inv-slot bevel-in">☸️<span class="inv-tip">Kubernetes</span></div>
+      <div class="inv-slot bevel-in">⛵<span class="inv-tip">Helm</span></div>
+      <div class="inv-slot bevel-in">🌐<span class="inv-tip">K3s / EKS</span></div>
+      <div class="inv-slot bevel-in">🔌<span class="inv-tip">MetalLB</span></div>
+    </div>
+  </div>
+
+  <div class="inv-group reveal d2">
+    <div class="inv-group-title">🛡️ DEVSECOPS TOOLING</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">🧪<span class="inv-tip">SonarQube</span></div>
+      <div class="inv-slot bevel-in">📦<span class="inv-tip">OWASP Dependency-Check</span></div>
+      <div class="inv-slot bevel-in">🔬<span class="inv-tip">Trivy</span></div>
+      <div class="inv-slot bevel-in">🕷️<span class="inv-tip">OWASP ZAP</span></div>
+      <div class="inv-slot bevel-in">🔑<span class="inv-tip">Gitleaks</span></div>
+      <div class="inv-slot bevel-in">✅<span class="inv-tip">Checkov</span></div>
+      <div class="inv-slot bevel-in">🔐<span class="inv-tip">Vault</span></div>
+    </div>
+  </div>
+
+  <div class="inv-group reveal">
+    <div class="inv-group-title">☁️ IaC & AWS CLOUD</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">🌍<span class="inv-tip">Terraform</span></div>
+      <div class="inv-slot bevel-in">🖥️<span class="inv-tip">EC2 · VPC · S3</span></div>
+      <div class="inv-slot bevel-in">☸️<span class="inv-tip">EKS</span></div>
+      <div class="inv-slot bevel-in">🗄️<span class="inv-tip">RDS</span></div>
+      <div class="inv-slot bevel-in">🪪<span class="inv-tip">IAM / IRSA</span></div>
+    </div>
+  </div>
+
+  <div class="inv-group reveal d1">
+    <div class="inv-group-title">📊 OBSERVABILITY</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">🔥<span class="inv-tip">Prometheus</span></div>
+      <div class="inv-slot bevel-in">📈<span class="inv-tip">Grafana</span></div>
+      <div class="inv-slot bevel-in">📜<span class="inv-tip">Loki</span></div>
+      <div class="inv-slot bevel-in">🧵<span class="inv-tip">Tempo</span></div>
+      <div class="inv-slot bevel-in">🧮<span class="inv-tip">PromQL</span></div>
+    </div>
+  </div>
+
+  <div class="inv-group reveal d2">
+    <div class="inv-group-title">⚔️ LANGUAGES & BACKEND</div>
+    <div class="inv-row">
+      <div class="inv-slot bevel-in">☕<span class="inv-tip">Java</span></div>
+      <div class="inv-slot bevel-in">🍃<span class="inv-tip">Spring Boot / Spring AI</span></div>
+      <div class="inv-slot bevel-in">🐍<span class="inv-tip">Python</span></div>
+      <div class="inv-slot bevel-in">⚡<span class="inv-tip">FastAPI</span></div>
+      <div class="inv-slot bevel-in">🐚<span class="inv-tip">Bash</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="certifications">
+  <div class="section-eyebrow">// ACHIEVEMENTS</div>
+  <h2 class="section-title">Trophy Case</h2>
+
+  <div class="toast-stack">
+    <div class="toast reveal">
+      <div class="toast-icon">☁️</div>
+      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">AWS Certified Solutions Architect – Associate</div><div class="toast-issuer">AMAZON WEB SERVICES</div></div>
+    </div>
+    <div class="toast reveal d1">
+      <div class="toast-icon">🌩️</div>
+      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">AWS Certified Cloud Practitioner</div><div class="toast-issuer">AMAZON WEB SERVICES</div></div>
+    </div>
+    <div class="toast reveal d2">
+      <div class="toast-icon">🌱</div>
+      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">Spring Boot Essentials</div><div class="toast-issuer">INFOSYS SPRINGBOARD</div></div>
+    </div>
+    <div class="toast reveal d3">
+      <div class="toast-icon">🏅</div>
+      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">Programming in Java — Elite + Gold</div><div class="toast-issuer">NPTEL · IIT KHARAGPUR · 2026</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LOOT CHESTS — PROJECTS -->
+<section id="projects">
+  <div class="section-eyebrow">// LOOT CHESTS</div>
+  <h2 class="section-title">Project Chests</h2>
+
+  <div class="chest-feat-grid">
+    <a href="https://github.com/kartavynirwel-code/DevHub-2.0" target="_blank" class="chest-card legendary panel-block reveal">
+      <div class="chest-head"><span class="chest-icon">🛡️</span><span class="chest-diff legendary">LEGENDARY</span></div>
+      <div class="chest-name n-legendary">DevHub 2.0 — Full DevSecOps Pipeline</div>
+      <div class="chest-desc">React + Spring Boot + MySQL on K3s (EC2). Complete Jenkins → ArgoCD GitOps pipeline: SonarQube Quality Gate (SAST), OWASP Dependency-Check (SCA), Trivy (container scan) all gating the merge. MetalLB provisions LoadBalancer IPs.</div>
+      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">ArgoCD</span><span class="loot-tag">SonarQube</span><span class="loot-tag">Trivy</span></div>
+      <span class="mc-btn gold small chest-open">OPEN CHEST ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/StatusPulse" target="_blank" class="chest-card legendary panel-block reveal d1">
+      <div class="chest-head"><span class="chest-icon">📡</span><span class="chest-diff legendary">LEGENDARY</span></div>
+      <div class="chest-name n-legendary">StatusPulse — Uptime & Incident Monitoring</div>
+      <div class="chest-desc">Monitor-service (Java/Spring Boot), alert-service (Python/FastAPI), React frontend on EC2 with hand-written K8s manifests. Cleared NodePort ranges, VITE_API_BASE_URL browser resolution, and Service naming bugs.</div>
+      <div class="chest-loot"><span class="loot-tag">Spring Boot</span><span class="loot-tag">FastAPI</span><span class="loot-tag">Kubernetes</span></div>
+      <span class="mc-btn gold small chest-open">OPEN CHEST ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/ecommerce-microservices" target="_blank" class="chest-card panel-block reveal d2">
+      <div class="chest-head"><span class="chest-icon">🌳</span><span class="chest-diff epic">EPIC</span></div>
+      <div class="chest-name n-epic">Terra & Oak — Ecommerce Microservices</div>
+      <div class="chest-desc">Auth, product, order, cart, frontend (Spring Boot/FastAPI/Node.js + Vite/React + MySQL) migrated Compose → Kubernetes via a generic Helm chart. Boss fights: CrashLoopBackOffs, selector mismatches, per-service DB users.</div>
+      <div class="chest-loot"><span class="loot-tag">Helm</span><span class="loot-tag">Kubernetes</span><span class="loot-tag">MySQL</span></div>
+      <span class="mc-btn small chest-open">OPEN CHEST ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/QuickCart-Microservices" target="_blank" class="chest-card panel-block reveal d3">
+      <div class="chest-head"><span class="chest-icon">🛒</span><span class="chest-diff epic">EPIC</span></div>
+      <div class="chest-name n-epic">QuickCart — Microservices Commerce</div>
+      <div class="chest-desc">React + Spring Boot + FastAPI + MySQL StatefulSet on Minikube & EC2. Full Jenkins pipeline: Docker build w/ frontend build-args, push, K8s deploy. Fixed OOMKilled pods, CORS, build-time env baking.</div>
+      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">Docker</span><span class="loot-tag">FastAPI</span></div>
+      <span class="mc-btn small chest-open">OPEN CHEST ▸</span>
+    </a>
+  </div>
+
+  <div class="chest-grid">
+    <a href="https://github.com/kartavynirwel-code/Devops-plates" target="_blank" class="chest-card panel-block reveal">
+      <div class="chest-head"><span class="chest-icon">📐</span><span class="chest-diff rare">RARE</span></div>
+      <div class="chest-name n-rare">Devops-plates</div>
+      <div class="chest-desc">22+ section reference repo — hand-written Terraform modules, Nginx Ingress TLS guides, Prometheus/Grafana notes, DAST troubleshooting docs.</div>
+      <div class="chest-loot"><span class="loot-tag">Terraform</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/DevHub" target="_blank" class="chest-card panel-block reveal d1">
+      <div class="chest-head"><span class="chest-icon">⚙️</span><span class="chest-diff rare">RARE</span></div>
+      <div class="chest-name n-rare">DevHub (v1)</div>
+      <div class="chest-desc">The original CI/CD build — Jenkins → ArgoCD → Minikube/K3s — foundation for DevHub 2.0.</div>
+      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">ArgoCD</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/FoodHub" target="_blank" class="chest-card panel-block reveal d2">
+      <div class="chest-head"><span class="chest-icon">🍔</span><span class="chest-diff rare">RARE</span></div>
+      <div class="chest-name n-rare">FoodHub</div>
+      <div class="chest-desc">Four-service microservices with Spring Cloud Gateway. JWT auth, IDOR fixes, restricted CORS, non-root Dockerfiles.</div>
+      <div class="chest-loot"><span class="loot-tag">JWT</span><span class="loot-tag">Gateway</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/PayEase" target="_blank" class="chest-card panel-block reveal d3">
+      <div class="chest-head"><span class="chest-icon">💳</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">PayEase</div>
+      <div class="chest-desc">Java payments app on Spring Boot with REST APIs, clean transactional backend design.</div>
+      <div class="chest-loot"><span class="loot-tag">Spring Boot</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/AI-HelpDesk" target="_blank" class="chest-card panel-block reveal">
+      <div class="chest-head"><span class="chest-icon">🤖</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">AI HelpDesk</div>
+      <div class="chest-desc">Spring AI helpdesk handling user queries with AI-driven responses on Java Spring Boot.</div>
+      <div class="chest-loot"><span class="loot-tag">Spring AI</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/CareerConnect-Student-Guide" target="_blank" class="chest-card panel-block reveal d1">
+      <div class="chest-head"><span class="chest-icon">🎓</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">CareerConnect Student Guide</div>
+      <div class="chest-desc">Career guidance platform bridging academics and jobs, built on Java backend architecture.</div>
+      <div class="chest-loot"><span class="loot-tag">Java</span><span class="loot-tag">MySQL</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/Gravity-Assistant" target="_blank" class="chest-card panel-block reveal d2">
+      <div class="chest-head"><span class="chest-icon">🚀</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">Gravity Assistant</div>
+      <div class="chest-desc">AI-powered Java assistant app demonstrating automation on a Spring Boot backend.</div>
+      <div class="chest-loot"><span class="loot-tag">Java</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/Endless-Browser-Al-Assistant-Browser" target="_blank" class="chest-card panel-block reveal d3">
+      <div class="chest-head"><span class="chest-icon">🌐</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">Endless Browser AI Assistant</div>
+      <div class="chest-desc">JavaScript-based AI assistant integrated into a browser interface for contextual help.</div>
+      <div class="chest-loot"><span class="loot-tag">JavaScript</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/FineSnap" target="_blank" class="chest-card panel-block reveal">
+      <div class="chest-head"><span class="chest-icon">📸</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">FineSnap</div>
+      <div class="chest-desc">Java app with MVC architecture and RESTful design for image-related functionality.</div>
+      <div class="chest-loot"><span class="loot-tag">Java</span><span class="loot-tag">MVC</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+    <a href="https://github.com/kartavynirwel-code/Library_management" target="_blank" class="chest-card panel-block reveal d1">
+      <div class="chest-head"><span class="chest-icon">📚</span><span class="chest-diff common">COMMON</span></div>
+      <div class="chest-name n-common">Library Management System</div>
+      <div class="chest-desc">Full-featured library app: book inventory, member management, borrowing records. Java, JDBC, MySQL.</div>
+      <div class="chest-loot"><span class="loot-tag">JDBC</span><span class="loot-tag">MySQL</span></div>
+      <span class="mc-btn small chest-open">OPEN ▸</span>
+    </a>
+  </div>
+
+  <div class="projects-cta">
+    <a href="https://github.com/kartavynirwel-code" target="_blank" class="mc-btn gold">VIEW ALL REPOS ON GITHUB ▸</a>
+  </div>
+</section>
+
+<!-- CONTACT — NETHER PORTAL -->
+<section id="contact">
+  <div class="section-eyebrow">// THE NETHER</div>
+  <h2 class="section-title">Enter the Portal</h2>
+
+  <div class="portal-layout">
+    <div class="reveal">
+      <div class="party-badge">● LOOKING FOR PARTY</div>
+      <h3 class="portal-title">Let's co-op on<br>something <span>secure</span>.</h3>
+      <p class="portal-sub">Open to DevOps/DevSecOps internships, entry-level roles, cloud infra projects, and collaborations. Step through and send an invite.</p>
+      <div class="portal-links">
+        <a href="mailto:kartavyanirwell@gmail.com" class="portal-link">
+          <div class="portal-link-icon">✉️</div>
+          <div><div class="portal-link-label">EMAIL</div><div class="portal-link-value">kartavyanirwell@gmail.com</div></div>
+        </a>
+        <a href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank" class="portal-link">
+          <div class="portal-link-icon">💼</div>
+          <div><div class="portal-link-label">LINKEDIN</div><div class="portal-link-value">kartavya-nirwel-0b7202326</div></div>
+        </a>
+        <a href="https://github.com/kartavynirwel-code" target="_blank" class="portal-link">
+          <div class="portal-link-icon">🐙</div>
+          <div><div class="portal-link-label">GITHUB</div><div class="portal-link-value">kartavynirwel-code</div></div>
+        </a>
+        <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="portal-link">
+          <div class="portal-link-icon">📄</div>
+          <div><div class="portal-link-label">RESUME</div><div class="portal-link-value">Download PDF</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal d1">
+      <div class="portal-frame">
+        <div class="portal-inner"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 <span>KARTAVYA NIRWEL</span> · WORLD SAVED VIA ARGOCD</div>
+  <div class="footer-links">
+    <a href="https://github.com/kartavynirwel-code" target="_blank">GITHUB</a>
+    <a href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank">LINKEDIN</a>
+    <a href="mailto:kartavyanirwell@gmail.com">EMAIL</a>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold:0.1, rootMargin:'0px 0px -60px 0px' });
+reveals.forEach(el => io.observe(el));
+
+// Active hotbar highlight
+const sections = document.querySelectorAll('section[id]');
+const hotbarLinks = document.querySelectorAll('.hotbar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if(window.scrollY >= s.offsetTop - 140) current = s.getAttribute('id'); });
+  hotbarLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+});
+
+// Mobile inventory menu
+const navToggle = document.getElementById('navToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+function closeMenu(){
+  navToggle.classList.remove('open'); mobileMenu.classList.remove('open');
+  navToggle.setAttribute('aria-expanded','false'); document.body.style.overflow='';
+}
+navToggle.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', String(isOpen));
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+</script>
+</body>
+</html>
