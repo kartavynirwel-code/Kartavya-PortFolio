@@ -97,6 +97,11 @@ button{font-family:inherit; border:none; background:none; color:inherit; cursor:
 .scanlines{ position:fixed; inset:0; z-index:15; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.10) 2px, rgba(0,0,0,0.10) 3px); mix-blend-mode:multiply; opacity:0.55; }
 @media (max-width:768px){ .scanlines{ opacity:0.35; } }
 @media (prefers-reduced-motion: reduce){ .scanlines{ display:none; } }
+.vignette{ position:fixed; inset:0; z-index:14; pointer-events:none; background:radial-gradient(ellipse at 50% 45%, transparent 38%, rgba(4,7,13,0.28) 78%, rgba(2,4,8,0.62) 100%); }
+
+/* ============ WAYPOINT ARROWS (screen-edge compass pointing to each zone) ============ */
+.waypoint-label{ position:absolute; transform:translate(-50%,-50%); pointer-events:none; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.5px; white-space:nowrap; text-shadow:0 1px 4px rgba(0,0,0,0.9); opacity:0; transition:opacity .25s; }
+.waypoint-label.show{ opacity:0.95; }
 
 /* ============ MODALS ============ */
 .modal-layer{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
@@ -266,6 +271,7 @@ button{font-family:inherit; border:none; background:none; color:inherit; cursor:
 <!-- ============ 3D CANVAS ============ -->
 <canvas id="gameCanvas"></canvas>
 <div class="scanlines"></div>
+<div class="vignette"></div>
 
 <!-- ============ HUD ============ -->
 <div class="hud" id="hud">
@@ -540,17 +546,19 @@ function startHintFade(){
   setTimeout(function(){ document.getElementById('hudHint').classList.add('fade'); }, 6500);
 }
 
+/* ================= PIXEL-ART CONSTANTS ================= */
+var PX = window.innerWidth < 640 ? 3 : 4;       // size of one "game pixel" in real screen pixels — the blockier this is, the more retro
+
 /* ================= RESIZE ================= */
 function resize(){
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  PX = window.innerWidth < 640 ? 3 : 4;
   ctx.imageSmoothingEnabled = false;
 }
 window.addEventListener('resize', resize);
 resize();
 
-/* ================= PIXEL-ART CONSTANTS ================= */
-var PX = window.innerWidth < 640 ? 3 : 4;       // size of one "game pixel" in real screen pixels — the blockier this is, the more retro
 var TILE = 16;                                   // game units per floor tile
 var WORLD_W = 900, WORLD_H = 560;                // game units
 
@@ -691,6 +699,29 @@ function drawFloor(camX, camY, viewW, viewH, t){
   }
 }
 
+function drawAmbientGlow(camX, camY, viewW, viewH, t){
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  var glowSpots = [{ x:HUB.x, y:HUB.y, color:'34,224,164', r:120 }];
+  stationDefs.forEach(function(s){
+    var hex = s.color.replace('#','');
+    var rgb = [parseInt(hex.substring(0,2),16), parseInt(hex.substring(2,4),16), parseInt(hex.substring(4,6),16)].join(',');
+    glowSpots.push({ x:s.x, y:s.y, color:rgb, r:90 });
+  });
+  glowSpots.forEach(function(g){
+    var sx = (g.x-camX)*PX, sy = (g.y-camY)*PX;
+    if(sx < -g.r*PX || sx > canvas.width+g.r*PX || sy < -g.r*PX || sy > canvas.height+g.r*PX) return;
+    var pulse = 0.5 + Math.sin(t*1.3 + g.x*0.05)*0.5;
+    var radius = g.r*PX*(0.9+pulse*0.15);
+    var grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, radius);
+    grad.addColorStop(0, 'rgba(' + g.color + ',' + (0.10+pulse*0.05) + ')');
+    grad.addColorStop(1, 'rgba(' + g.color + ',0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(sx-radius, sy-radius, radius*2, radius*2);
+  });
+  ctx.restore();
+}
+
 function drawCircuitTraces(camX, camY, t){
   ctx.lineWidth = Math.max(2, Math.round(2*PX/3));
   ctx.setLineDash([6*PX/3, 5*PX/3]);
@@ -800,6 +831,47 @@ function drawStation(s, camX, camY, t, dist){
   ctx.fillText(s.label.toUpperCase(), sx, sy + 12);
 }
 
+function drawWaypoints(camX, camY, skipKey){
+  var margin = 44;
+  var cw = canvas.width, ch = canvas.height;
+  var cx = cw/2, cy = ch/2;
+  var halfW = cw/2 - margin, halfH = ch/2 - margin;
+  stationDefs.forEach(function(s){
+    if(s.key === skipKey) return;
+    var sx = (s.x-camX)*PX, sy = (s.y-camY)*PX;
+    var onScreen = sx > 30 && sx < cw-30 && sy > 96 && sy < ch-110;
+    if(onScreen) return;
+    var dx = sx-cx, dy = sy-cy;
+    if(dx===0 && dy===0) dx = 0.001;
+    var angle = Math.atan2(dy,dx);
+    var scaleX = dx!==0 ? Math.abs(halfW/dx) : Infinity;
+    var scaleY = dy!==0 ? Math.abs(halfH/dy) : Infinity;
+    var scale = Math.min(scaleX, scaleY);
+    var ex = cx+dx*scale, ey = cy+dy*scale;
+
+    ctx.save();
+    ctx.translate(ex, ey);
+    ctx.rotate(angle);
+    ctx.shadowColor = s.color; ctx.shadowBlur = 10;
+    ctx.fillStyle = s.color;
+    ctx.beginPath();
+    ctx.moveTo(13,0); ctx.lineTo(-7,7); ctx.lineTo(-7,-7); ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(6,10,18,0.75)';
+    var lx = ex - Math.cos(angle)*24, ly = ey - Math.sin(angle)*24;
+    var label = s.label.toUpperCase();
+    var tw = ctx.measureText(label).width;
+    ctx.fillRect(lx-tw/2-6, ly-9, tw+12, 18);
+    ctx.fillStyle = s.color;
+    ctx.fillText(label, lx, ly+1);
+  });
+}
+
 /* directional pixel sprite, drawn from small rectangles — no external images needed */
 function drawPlayer(sx, sy, dir, frame, moving){
   var step = moving ? (frame===0 ? 1 : -1) : 0;
@@ -821,12 +893,12 @@ function drawPlayer(sx, sy, dir, frame, moving){
     R(0,0,-5,-14,10,7,PAL.vest);           // body
     R(0,0,-4.5,-19,9,6,PAL.straw);         // hat crown (back, no face)
     R(0,0,-6,-16,12,3,PAL.strawDark);      // brim edge
-  } else if(dir==='down' || dir==='left'){
-    var facing = (dir==='left') ? 1 : 0; // side vs front uses similar rig; 'left' narrower silhouette
-    var w = dir==='left' ? 5 : 8;
+  } else if(dir==='down' || dir==='left' || dir==='right'){
+    var isSide = (dir==='left' || dir==='right'); // left+right share the narrower side rig; right is just left mirrored via ctx.scale above
+    var w = isSide ? 5 : 8;
     /* legs */
-    R(0,0,(dir==='left'?-2:1)+step*0.5,-4,3,5,PAL.pants);
-    R(0,0,(dir==='left'?-4:-3)-step*0.5,-4,3,5,PAL.pants);
+    R(0,0,(isSide?-2:1)+step*0.5,-4,3,5,PAL.pants);
+    R(0,0,(isSide?-4:-3)-step*0.5,-4,3,5,PAL.pants);
     R(0,0,-3,-2,3,2,PAL.boots); R(0,0,1,-2,3,2,PAL.boots);
     /* body */
     R(0,0,-w/2,-13,w,7,PAL.vest);
@@ -900,6 +972,7 @@ function animate(now){
 
   /* -------- draw -------- */
   drawFloor(camX, camY, viewW, viewH, t);
+  drawAmbientGlow(camX, camY, viewW, viewH, t);
   drawCircuitTraces(camX, camY, t);
   drawHub(camX, camY, t);
   props.forEach(function(p){ drawProp(p, camX, camY, t); });
@@ -931,6 +1004,8 @@ function animate(now){
       drawStation(item.s, camX, camY, t, d);
     }
   });
+
+  if(loaderDone) drawWaypoints(camX, camY, closest ? closest.key : null);
 
   activeStation = closest;
   if(loaderDone && closest){
