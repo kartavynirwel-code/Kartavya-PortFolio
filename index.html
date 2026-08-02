@@ -2,805 +2,881 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Kartavya Nirwel — DevSecOps Engineer in the Making</title>
-<meta name="description" content="Kartavya Nirwel — DevSecOps Engineer in the Making. Java/Spring Boot, Docker, Kubernetes, Jenkins, ArgoCD, Terraform, AWS Certified.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Kartavya Nirwel — DevSecOps Engineer | Explore My Island</title>
+<meta name="description" content="Kartavya Nirwel — DevSecOps Engineer in the Making. An explorable 3D portfolio island. Walk around, discover the pipeline, arsenal, projects and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --sky-top:#5aa7dd; --sky-bot:#bfe6f7;
-  --grass:#6aab3a; --grass-dark:#4f8a2a; --dirt:#7a5230; --dirt-dark:#5c3d22;
-  --stone:#3a3a3e; --stone-dark:#232326; --deepslate:#232228; --deepslate2:#18171c;
-  --slot-fill:#8b8b8b; --slot-fill-dark:#6e6e6e;
-  --panel:#2b2a30; --panel2:#332f3c;
-  --white:#f4f4f4; --hi:#ffffff88; --sh:#00000066;
-  --gold:#ffd93d; --emerald:#3fd67a; --diamond:#55e6e6; --redstone:#ff5b4d; --lapis:#3b6fd6;
-  --epic:#c964e8; --rare:#55e6e6; --uncommon:#ffd93d; --common:#e6e6e6;
-  --text:#eceaf2; --text-dim:#b7b3c4; --text-dim2:#847e97;
-  --nether:#3a0d5c; --nether2:#1a0430; --portal:#b060ff;
+  --abyss:#060a12; --deep:#0b1626; --deep2:#0f1e33; --panel:#0f1c2e; --panel2:#0b1626;
+  --panel-line:#1c3350;
+  --gear5:#f8f6ee; --gold:#e3b661; --gold-soft:#f1cd8a; --gold-dim:#8a6a3c;
+  --emerald:#22e0a4; --emerald-soft:#7bf0cb; --emerald-dim:#0f7a58;
+  --storm:#3d8fc0;
+  --text:#dde4ec; --text-dim:#93a3b5; --text-dim2:#57687c;
+  --line:rgba(227,182,97,0.16);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-html,body{max-width:100%;overflow-x:hidden}
-body{
-  font-family:'DM Sans',sans-serif; background:var(--deepslate2); color:var(--text);
-  image-rendering:pixelated;
-}
-.blocky{font-family:'Press Start 2P',cursive}
-h1,h2,h3,.section-eyebrow,.mc-btn,.slot-label,.hotbar-key,.toast-title,.chest-diff,.splash{font-family:'Press Start 2P',cursive}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
+body{ font-family:'Inter',sans-serif; background:var(--abyss); color:var(--text); -webkit-tap-highlight-color:transparent; user-select:none; }
+.display{font-family:'Cinzel',serif} .mono{font-family:'JetBrains Mono',monospace}
+h1,h2,h3{font-family:'Cinzel',serif; font-weight:700;}
+a{color:inherit} img{max-width:100%;display:block}
+button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer;}
+::selection{ background:var(--emerald); color:#04140f; }
 
-/* ===== Minecraft-style bevel utilities ===== */
-.bevel-out{
-  border-top:4px solid var(--hi);
-  border-left:4px solid var(--hi);
-  border-right:4px solid var(--sh);
-  border-bottom:4px solid var(--sh);
-  background:var(--slot-fill);
-}
-.bevel-in{
-  border-top:4px solid var(--sh);
-  border-left:4px solid var(--sh);
-  border-right:4px solid var(--hi);
-  border-bottom:4px solid var(--hi);
-  background:#4b4b4f;
-}
-.panel-block{
-  background:var(--panel);
-  border-top:4px solid #4a4656;
-  border-left:4px solid #4a4656;
-  border-right:4px solid #100e16;
-  border-bottom:4px solid #100e16;
-}
+/* ============ GAME CANVAS ============ */
+#gameCanvas{ position:fixed; inset:0; width:100%; height:100%; display:block; z-index:1; touch-action:none; }
 
-::selection{ background:var(--portal); color:#fff; }
+/* ============ LOADER ============ */
+#loader{
+  position:fixed; inset:0; z-index:9999; overflow:hidden; cursor:pointer;
+  background:linear-gradient(180deg,#050a13 0%, #0a1729 45%, #123049 100%);
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .85s cubic-bezier(.7,0,.2,1);
+  clip-path:polygon(0% 0%,100% 0%,100% 100%,96% 98%,90% 100%,84% 97%,78% 100%,72% 98%,66% 100%,60% 97%,54% 100%,48% 98%,42% 100%,36% 97%,30% 100%,24% 98%,18% 100%,12% 97%,6% 100%,0% 98%);
+}
+#loader.wipe{ transform:translateY(-104%); }
+#loader.hide{ display:none; }
+#loaderCanvas{ position:absolute; inset:0; width:100%; height:100%; z-index:1; }
+.ld-fallback{ position:absolute; inset:0; z-index:1; }
+.ld-fallback.ld-hidden{ display:none; }
+.ld-stars{ position:absolute; inset:0; background-image:radial-gradient(1.5px 1.5px at 20% 20%, rgba(248,246,238,0.5), transparent), radial-gradient(1.5px 1.5px at 60% 12%, rgba(248,246,238,0.4), transparent), radial-gradient(1px 1px at 80% 30%, rgba(248,246,238,0.4), transparent); }
+.ld-text{ position:relative; z-index:5; display:flex; flex-direction:column; align-items:center; }
+.ld-title{ font-size:clamp(18px,4vw,28px); letter-spacing:4px; color:var(--gear5); text-shadow:0 0 26px rgba(248,246,238,0.4); margin-bottom:16px; text-align:center; }
+.ld-pct{ font-size:12px; letter-spacing:2px; color:var(--emerald-soft); margin-bottom:10px; }
+.ld-bar{ width:240px; height:3px; background:rgba(227,182,97,0.2); position:relative; overflow:hidden; }
+.ld-bar-fill{ position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,var(--emerald),var(--gold)); box-shadow:0 0 10px rgba(34,224,164,0.7); }
+.ld-log{ margin-top:16px; height:16px; font-size:10.5px; color:var(--text-dim2); letter-spacing:0.5px; }
+.ld-skip{ margin-top:20px; font-size:9px; letter-spacing:2px; color:var(--text-dim2); text-transform:uppercase; opacity:0.6; }
 
-/* ===== NAV / HOTBAR ===== */
-nav{
-  position:fixed; top:0; left:0; right:0; z-index:200;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 26px; background:rgba(24,23,28,0.92); border-bottom:4px solid var(--deepslate);
-  backdrop-filter:blur(4px);
-}
-.brand{ display:flex; align-items:center; gap:12px; text-decoration:none; }
-.brand-slot{
-  width:34px;height:34px; display:flex;align-items:center;justify-content:center;
-  font-size:16px; border-radius:2px;
-}
-.brand-name{ font-size:11px; color:var(--gold); letter-spacing:0.5px; }
-.brand-sub{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim2); margin-top:2px; }
+/* ============ NO-WEBGL FALLBACK SITE ============ */
+#fallback{ display:none; position:fixed; inset:0; z-index:50; overflow-y:auto; background:var(--abyss); padding:60px 20px 80px; }
+#fallback.show{ display:block; }
+.fb-wrap{ max-width:760px; margin:0 auto; }
+.fb-wrap h1{ font-size:clamp(24px,5vw,36px); color:var(--gear5); margin-bottom:6px; }
+.fb-wrap .fb-tag{ font-family:'JetBrains Mono',monospace; color:var(--emerald-soft); font-size:12px; letter-spacing:1.5px; margin-bottom:30px; text-transform:uppercase; }
+.fb-wrap h2{ font-size:18px; color:var(--gold); margin:34px 0 12px; letter-spacing:1px; }
+.fb-wrap p{ color:var(--text-dim); line-height:1.8; margin-bottom:10px; font-size:14.5px; }
+.fb-wrap ul{ list-style:none; }
+.fb-wrap li{ color:var(--text-dim); padding:8px 0; border-bottom:1px dashed var(--line); font-size:13.5px; }
 
-.hotbar{ display:flex; gap:6px; list-style:none; }
-.hotbar a{
-  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  width:52px; height:44px; text-decoration:none; color:var(--text); font-size:16px;
-}
-.hotbar-key{ position:absolute; top:2px; left:4px; font-size:7px; color:var(--text-dim2); }
-.hotbar a:hover, .hotbar a.active{ filter:brightness(1.25); }
-.hotbar a.active{ border-color:var(--gold) !important; }
+/* ============ HUD ============ */
+.hud{ position:fixed; inset:0; z-index:20; pointer-events:none; opacity:0; transition:opacity .5s; }
+.hud.on{ opacity:1; }
+.hud-top{ position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:16px 18px; pointer-events:auto; }
+.hud-brand{ display:flex; align-items:center; gap:10px; background:rgba(6,10,18,0.65); border:1px solid var(--line); padding:8px 14px; backdrop-filter:blur(6px); }
+.hud-brand .hb-mark{ width:22px; height:22px; }
+.hud-brand .hb-name{ font-size:11px; letter-spacing:1.5px; color:var(--gear5); }
+.hud-brand .hb-sub{ font-family:'JetBrains Mono',monospace; font-size:8.5px; color:var(--emerald-soft); letter-spacing:0.5px; }
+.hud-actions{ display:flex; gap:8px; }
+.hud-btn{ display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; padding:10px 14px; background:rgba(6,10,18,0.65); border:1px solid var(--panel-line); color:var(--gear5); backdrop-filter:blur(6px); transition:border-color .2s; }
+.hud-btn:hover{ border-color:var(--emerald); }
+.hud-btn.gold{ background:linear-gradient(135deg,var(--gold-soft),var(--gold)); color:#211405; border:none; }
 
-.mc-btn{
-  display:inline-flex; align-items:center; gap:8px; font-size:10px; padding:11px 16px;
-  color:#222; text-decoration:none; transition:transform .05s;
-  background:var(--emerald);
-}
-.mc-btn:active{ transform:translateY(1px); }
-.mc-btn.gold{ background:var(--gold); }
-.mc-btn.small{ padding:8px 12px; font-size:9px; }
-.mc-btn.full{ width:100%; justify-content:center; }
+.hud-hint{ position:absolute; bottom:22px; left:50%; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:1px; color:var(--text-dim); background:rgba(6,10,18,0.65); border:1px solid var(--line); padding:9px 16px; backdrop-filter:blur(6px); opacity:1; transition:opacity .4s; text-align:center; pointer-events:none; }
+.hud-hint.fade{ opacity:0; }
 
-.nav-toggle{
-  display:none; width:42px; height:42px; align-items:center; justify-content:center;
-  font-size:16px; color:var(--gold); flex-shrink:0;
+.prompt{
+  position:absolute; transform:translate(-50%,-100%); pointer-events:auto; opacity:0; transition:opacity .2s;
+  display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;
 }
-.mobile-menu{
-  display:none; position:fixed; inset:0; z-index:190; background:var(--deepslate2);
-  flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  opacity:0; pointer-events:none; transition:opacity .25s;
-}
-.mobile-menu.open{ opacity:1; pointer-events:auto; }
-.mobile-menu .mm-title{ font-size:13px; color:var(--gold); margin-bottom:22px; letter-spacing:1px; }
-.mobile-menu a{ font-family:'Press Start 2P',cursive; font-size:14px; color:var(--text); text-decoration:none; padding:14px 0; display:flex; align-items:center; gap:12px; }
-.mobile-menu a .mi{ font-size:18px; }
-.mobile-menu a:active{ color:var(--gold); }
-.mobile-menu .mm-cta{ margin-top:22px; }
+.prompt.show{ opacity:1; }
+.prompt-label{ font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:var(--gold); text-transform:uppercase; background:rgba(6,10,18,0.75); padding:4px 10px; border:1px solid var(--gold-dim); white-space:nowrap; }
+.prompt-key{ width:30px; height:30px; border-radius:50%; background:rgba(34,224,164,0.15); border:1.5px solid var(--emerald); color:var(--emerald-soft); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:12px; animation:prompt-pulse 1.4s ease-in-out infinite; }
+@keyframes prompt-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(34,224,164,0.5);} 50%{ box-shadow:0 0 0 8px rgba(34,224,164,0);} }
 
-/* ===== SECTIONS ===== */
-section{ padding:90px 28px; position:relative; max-width:1280px; margin:0 auto; }
-.section-eyebrow{ font-size:10.5px; color:var(--gold); letter-spacing:1px; margin-bottom:18px; }
-.section-title{ font-size:clamp(19px,3.6vw,32px); line-height:1.6; color:var(--white); margin-bottom:48px; text-shadow:3px 3px 0 var(--sh); }
+/* joystick */
+.joystick{ position:absolute; left:26px; bottom:26px; width:104px; height:104px; border-radius:50%; background:rgba(15,28,46,0.5); border:1.5px solid var(--panel-line); pointer-events:auto; display:none; }
+.joystick.active-input{ display:block; }
+.joy-nub{ position:absolute; width:46px; height:46px; border-radius:50%; left:29px; top:29px; background:radial-gradient(circle at 35% 30%, var(--emerald-soft), var(--emerald-dim)); box-shadow:0 4px 10px rgba(0,0,0,0.4); }
+.cam-hint{ position:absolute; right:24px; bottom:26px; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim2); letter-spacing:1px; text-align:right; pointer-events:none; opacity:0.7; }
 
-/* ===== HERO — OVERWORLD ===== */
-#hero{
-  min-height:100vh; position:relative; overflow:hidden; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; text-align:center; padding:130px 22px 0;
-  background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bot) 65%, var(--sky-bot) 100%);
+/* ============ MODALS ============ */
+.modal-layer{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-layer.open{ display:flex; }
+.modal-backdrop{ position:absolute; inset:0; background:rgba(4,7,13,0.82); backdrop-filter:blur(4px); }
+.modal{
+  position:relative; width:100%; max-width:780px; max-height:86vh; overflow-y:auto;
+  background:linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--panel-line);
+  padding:34px 30px 40px; animation:modal-in .3s cubic-bezier(.2,.9,.3,1);
 }
-.pixel-sun{
-  position:absolute; top:70px; right:60px; width:70px; height:70px; background:#fff6a0;
-  box-shadow:0 0 0 8px #ffffff55; z-index:1;
-}
-.cloud{ position:absolute; background:#ffffffcc; z-index:1; }
-.cloud::before, .cloud::after{ content:''; position:absolute; background:#ffffffcc; }
-.c1{ width:90px; height:26px; top:110px; left:8%; }
-.c1::before{ width:40px; height:20px; top:-14px; left:14px; }
-.c2{ width:70px; height:20px; top:200px; right:20%; }
-.c2::before{ width:34px; height:16px; top:-12px; left:16px; }
-.c3{ width:60px; height:18px; top:150px; left:38%; }
+@keyframes modal-in{ from{ opacity:0; transform:translateY(18px) scale(0.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
+.modal-close{ position:absolute; top:16px; right:16px; width:34px; height:34px; border:1px solid var(--panel-line); display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--text-dim); background:rgba(6,10,18,0.5); }
+.modal-close:hover{ color:var(--gear5); border-color:var(--emerald); }
+.modal-eyebrow{ display:flex; align-items:center; gap:12px; font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+.modal-eyebrow::before{ content:''; width:26px; height:1px; background:linear-gradient(90deg, transparent, var(--gold)); }
+.modal-title{ font-size:clamp(22px,3.6vw,32px); color:var(--gear5); margin-bottom:8px; }
+.modal-sub{ font-size:14px; color:var(--text-dim); max-width:600px; line-height:1.7; margin-bottom:30px; }
 
-.hero-inner{ position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; }
-.avatar-slot{
-  width:76px; height:76px; display:flex; align-items:center; justify-content:center; font-size:34px;
-  margin-bottom:22px;
-}
-.hero-title{
-  font-size:clamp(24px,6vw,46px); color:#3d3d3d; letter-spacing:2px; line-height:1.5;
-  text-shadow:3px 3px 0 #ffffffaa, 5px 5px 0 rgba(0,0,0,0.25);
-  position:relative;
-}
-.splash{
-  position:absolute; top:-26px; right:-40px; font-size:9px; color:var(--redstone); transform:rotate(-14deg);
-  animation:bounce 1.4s ease-in-out infinite; text-shadow:2px 2px 0 #fff;
-}
-@keyframes bounce{ 0%,100%{ transform:rotate(-14deg) scale(1); } 50%{ transform:rotate(-14deg) scale(1.12); } }
-.hero-tag{ font-size:12px; color:#2c2c2c; letter-spacing:0.5px; margin-top:20px; margin-bottom:22px; }
-.hero-desc{
-  font-family:'JetBrains Mono',monospace; font-size:14.5px; line-height:1.8; color:#2f2f2f;
-  max-width:600px; margin-bottom:30px; background:rgba(255,255,255,0.35); padding:16px 20px;
-}
-.hero-desc b{ color:var(--nether); }
-.hero-actions{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:34px; }
-.hero-coins{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:20px; }
-.coin-chip{
-  display:flex; align-items:center; gap:8px; padding:10px 16px;
-  font-family:'JetBrains Mono',monospace; font-size:13px; color:#2c2c2c; background:rgba(255,255,255,0.55);
-}
-.coin-chip b{ font-family:'Press Start 2P',cursive; font-size:12px; color:var(--nether); }
+/* reused content components */
+.stat-row{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.stat-tag{ font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:1px; color:var(--text-dim); width:96px; flex-shrink:0; text-transform:uppercase; }
+.stat-bars{ display:flex; gap:4px; flex:1; }
+.bar-seg{ flex:1; height:8px; background:#182636; border-radius:2px; }
+.bar-seg.on.a{ background:linear-gradient(90deg,var(--emerald-dim),var(--emerald)); }
+.bar-seg.on.b{ background:linear-gradient(90deg,#1c5d80,var(--storm)); }
+.bar-seg.on.c{ background:linear-gradient(90deg,#7a2f2f,#d95b5b); }
+.bar-seg.on.d{ background:linear-gradient(90deg,var(--gold-dim),var(--gold)); }
+.bar-seg.on.e{ background:linear-gradient(90deg,#5a3a8a,#a56bf0); }
+.log-book{ margin-top:22px; padding:18px; background:rgba(6,10,18,0.5); border:1px solid var(--line); }
+.log-book h4{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--gold); margin-bottom:12px; text-transform:uppercase; }
+.log-item{ display:flex; gap:10px; font-size:13px; color:var(--text-dim); padding:8px 0; border-bottom:1px dashed rgba(227,182,97,0.12); }
+.log-item:last-child{ border-bottom:none; } .log-item span{ color:var(--emerald); flex-shrink:0; }
+.about-grid{ display:grid; grid-template-columns:0.95fr 1.05fr; gap:32px; }
+.about-text p{ font-size:14.5px; color:var(--text-dim); line-height:1.85; margin-bottom:16px; }
+.about-text p b{ color:var(--gear5); font-weight:600; } .about-text p .g{ color:var(--emerald-soft); font-weight:600; }
 
-.ground{ position:relative; z-index:2; width:100%; margin-top:auto; }
-.ground-grass{ height:26px; background:repeating-linear-gradient(90deg, var(--grass) 0 20px, var(--grass-dark) 20px 22px); }
-.ground-dirt{ height:44px; background:repeating-linear-gradient(90deg, var(--dirt) 0 20px, var(--dirt-dark) 20px 22px); }
-.scroll-hint{ position:relative; z-index:3; font-family:'JetBrains Mono',monospace; font-size:13px; color:#2c2c2c; margin-bottom:14px; animation:blink 1.3s step-end infinite; }
-@keyframes blink{ 50%{ opacity:0.25; } }
+.route{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px 10px; position:relative; margin-bottom:8px; }
+.stop{ display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+.stop-node{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; background:radial-gradient(circle at 35% 30%, #16283f, #0b1626); border:1px solid var(--panel-line); }
+.stop.pending .stop-node{ opacity:0.35; }
+.stop-label{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1px; color:var(--gold); text-transform:uppercase; }
+.stop-tool{ font-size:9.5px; color:var(--text-dim); max-width:100px; }
+.route-final{ display:flex; align-items:center; gap:14px; margin-top:20px; padding-top:20px; border-top:1px solid var(--line); }
+.route-final .flag{ width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; background:radial-gradient(circle at 35% 30%, rgba(34,224,164,0.25), rgba(15,28,46,0.9)); border:1px solid var(--emerald); flex-shrink:0; }
+.route-final .flag-label{ font-family:'Cinzel',serif; font-size:12.5px; color:var(--emerald-soft); }
+.route-note{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:14px; }
 
-/* ===== CRAFTING (pipeline) ===== */
-#pipeline{ background:var(--stone-dark); }
-.craft-desc{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:14px; max-width:620px; margin-top:-28px; margin-bottom:44px; line-height:1.7; }
-.craft-layout{ display:flex; align-items:center; gap:36px; flex-wrap:wrap; justify-content:center; }
-.craft-grid{ display:grid; grid-template-columns:repeat(3,74px); grid-template-rows:repeat(3,74px); gap:8px; padding:16px; }
-.craft-slot{
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  font-size:24px; position:relative; cursor:default;
-}
-.craft-slot .slot-label{ font-size:6px; color:var(--text-dim2); position:absolute; bottom:4px; left:0; right:0; text-align:center; }
-.craft-slot:hover .slot-tip{ display:block; }
-.slot-tip{
-  display:none; position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
-  background:var(--nether2); border:2px solid var(--portal); padding:8px 12px; white-space:nowrap; z-index:5;
-  font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--diamond);
-}
-.craft-arrow{ font-size:34px; color:var(--text-dim2); }
-.craft-output{ display:flex; flex-direction:column; align-items:center; gap:10px; }
-.craft-output .out-slot{ width:88px; height:88px; display:flex; align-items:center; justify-content:center; font-size:36px; }
-.craft-output .out-label{ font-family:'Press Start 2P',cursive; font-size:9px; color:var(--emerald); text-align:center; max-width:160px; line-height:1.6; }
-.craft-legend{ display:flex; gap:22px; flex-wrap:wrap; margin-top:40px; padding-top:20px; border-top:2px dashed #444; }
-.legend-item{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); }
-.legend-dot{ width:10px; height:10px; }
+.arsenal-group{ margin-bottom:22px; }
+.arsenal-group-title{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:1.5px; color:var(--gold); margin-bottom:12px; text-transform:uppercase; }
+.arsenal-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.blade{ display:flex; align-items:center; gap:8px; padding:9px 14px; font-size:12.5px; color:var(--text); background:rgba(15,28,46,0.55); border:1px solid var(--panel-line); border-left:2px solid var(--emerald-dim); }
 
-/* ===== STATS (about) ===== */
-#about{ background:var(--deepslate); }
-.stats-layout{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:40px; align-items:start; }
-.stats-card{ padding:26px; }
-.stats-head{ display:flex; align-items:center; gap:16px; margin-bottom:20px; padding-bottom:16px; border-bottom:2px dashed #4a4656; }
-.stats-portrait{ width:52px; height:52px; display:flex; align-items:center; justify-content:center; font-size:24px; }
-.stats-name{ font-size:12px; color:var(--gold); margin-bottom:8px; }
-.stats-class{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--diamond); }
-.stat-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-.stat-tag{ font-size:9.5px; color:var(--text-dim); width:82px; flex-shrink:0; font-family:'Press Start 2P',cursive; }
-.stat-hearts{ display:flex; gap:3px; flex:1; }
-.heart-seg{ flex:1; height:14px; background:#4b4b4f; border:2px solid #222; }
-.heart-seg.on{ background:var(--redstone); }
-.heart-seg.on.xp{ background:var(--emerald); }
-.heart-seg.on.cloud{ background:var(--diamond); }
-.heart-seg.on.gold{ background:var(--gold); }
-.heart-seg.on.purple{ background:var(--epic); }
+.badge-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.badge-card{ display:flex; align-items:center; gap:14px; padding:16px 18px; background:rgba(15,28,46,0.55); border:1px solid var(--panel-line); border-left:3px solid var(--gold); }
+.badge-icon{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; background:radial-gradient(circle at 35% 30%, #1a2f47, #0c1826); border:1px solid var(--gold-dim); flex-shrink:0; }
+.badge-tag{ font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:1px; color:var(--gold); margin-bottom:4px; text-transform:uppercase; }
+.badge-name{ font-family:'Cinzel',serif; font-size:13px; color:var(--gear5); line-height:1.35; margin-bottom:3px; }
+.badge-issuer{ font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--emerald-soft); }
 
-.about-text p{ font-family:'JetBrains Mono',monospace; font-size:14.5px; color:var(--text-dim); line-height:1.85; margin-bottom:18px; }
-.about-text p b{ color:var(--diamond); }
-.log-book{ margin-top:24px; padding:20px; }
-.log-book h4{ font-size:9.5px; color:var(--gold); margin-bottom:14px; }
-.log-item{ display:flex; gap:10px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); padding:8px 0; border-bottom:1px dashed #3a3742; }
-.log-item:last-child{ border-bottom:none; }
-.log-item span{ color:var(--gold); flex-shrink:0; }
+.crate-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.crate{ padding:18px; background:rgba(15,28,46,0.55); border:1px solid var(--panel-line); display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit; transition:border-color .2s, transform .15s; }
+.crate:hover{ border-color:var(--emerald); transform:translateY(-3px); }
+.crate-head{ display:flex; align-items:center; justify-content:space-between; }
+.crate-icon{ font-size:18px; }
+.crate-tier{ font-family:'JetBrains Mono',monospace; font-size:8px; padding:4px 8px; letter-spacing:1px; text-transform:uppercase; }
+.crate-tier.logged{ background:#26364a; color:#aab7c6; }
+.crate-tier.charted{ background:#173a52; color:#7bc4e8; }
+.crate-tier.flagship{ background:linear-gradient(120deg,var(--gold),var(--gold-soft)); color:#211405; }
+.crate-name{ font-family:'Cinzel',serif; font-size:13px; color:var(--gear5); line-height:1.4; }
+.crate-desc{ font-size:11.5px; color:var(--text-dim); line-height:1.6; }
+.crate-loot{ display:flex; flex-wrap:wrap; gap:5px; }
+.loot-tag{ font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--emerald-soft); background:rgba(34,224,164,0.06); border:1px solid var(--emerald-dim); padding:2px 7px; }
 
-/* ===== SKILLS — INVENTORY ===== */
-#skills{ background:var(--stone-dark); }
-.inv-group{ margin-bottom:30px; }
-.inv-group-title{ font-size:10px; color:var(--portal); letter-spacing:0.5px; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
-.inv-row{ display:flex; flex-wrap:wrap; gap:8px; }
-.inv-slot{
-  width:64px; height:64px; display:flex; align-items:center; justify-content:center;
-  font-size:22px; position:relative; flex-shrink:0;
-}
-.inv-slot:hover .inv-tip{ display:block; }
-.inv-tip{
-  display:none; position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
-  background:var(--nether2); border:2px solid var(--portal); padding:8px 12px; white-space:nowrap; z-index:5;
-  font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text);
-}
+.manifest{ display:flex; flex-direction:column; gap:10px; }
+.manifest-link{ display:flex; align-items:center; gap:14px; padding:14px 18px; text-decoration:none; color:var(--text); background:rgba(15,28,46,0.55); border:1px solid var(--panel-line); transition:border-color .2s, transform .15s; }
+.manifest-link:hover{ border-color:var(--emerald); transform:translateX(4px); }
+.manifest-icon{ width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:14px; background:rgba(6,10,18,0.6); border:1px solid var(--panel-line); flex-shrink:0; }
+.manifest-label{ font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:1px; color:var(--gold); margin-bottom:4px; text-transform:uppercase; }
+.manifest-value{ font-family:'JetBrains Mono',monospace; font-size:12.5px; overflow-wrap:anywhere; }
 
-/* ===== ACHIEVEMENTS — toasts ===== */
-#certifications{ background:var(--deepslate); }
-.toast-stack{ display:flex; flex-direction:column; gap:14px; max-width:560px; }
-.toast{ display:flex; align-items:center; gap:16px; padding:16px 20px; background:rgba(20,18,26,0.9); border-left:6px solid var(--gold); }
-.toast-icon{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-.toast-title{ font-size:8px; color:var(--gold); margin-bottom:6px; letter-spacing:0.5px; }
-.toast-name{ font-family:'JetBrains Mono',monospace; font-size:14.5px; color:var(--white); font-weight:700; margin-bottom:3px; }
-.toast-issuer{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--diamond); }
+.mc-btn{ display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:11px 18px; text-decoration:none; color:#04140f; background:linear-gradient(135deg,var(--emerald-soft),var(--emerald)); border:none; }
+.mc-btn.gold{ background:linear-gradient(135deg,var(--gold-soft),var(--gold)); }
+.mc-btn.ghost{ background:transparent; color:var(--gear5); border:1px solid var(--panel-line); }
 
-/* ===== PROJECTS — LOOT CHESTS ===== */
-#projects{ background:var(--stone-dark); }
-.chest-feat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-bottom:18px; }
-.chest-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.chest-card{
-  padding:22px; display:flex; flex-direction:column; gap:12px; text-decoration:none; color:inherit;
-  position:relative; transition:transform .12s;
-}
-.chest-card:hover{ transform:translateY(-4px); }
-.chest-card.legendary{ position:relative; overflow:hidden; }
-.chest-card.legendary::after{
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
-  background-size:250% 250%; animation:glint 3.5s linear infinite;
-}
-@keyframes glint{ 0%{ background-position:200% 200%; } 100%{ background-position:-50% -50%; } }
-.chest-head{ display:flex; align-items:center; justify-content:space-between; }
-.chest-icon{ font-size:22px; }
-.chest-diff{ font-size:8px; padding:5px 8px; color:#111; }
-.chest-diff.common{ background:var(--common); }
-.chest-diff.rare{ background:var(--rare); color:#111; }
-.chest-diff.epic{ background:var(--epic); color:#fff; }
-.chest-diff.legendary{ background:var(--gold); color:#111; }
-.chest-name{ font-size:13.5px; line-height:1.4; }
-.chest-name.n-common{ color:var(--common); }
-.chest-name.n-rare{ color:var(--rare); }
-.chest-name.n-epic{ color:var(--epic); }
-.chest-name.n-legendary{ color:var(--gold); }
-.chest-desc{ font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--text-dim); line-height:1.6; flex:1; }
-.chest-loot{ display:flex; flex-wrap:wrap; gap:6px; }
-.loot-tag{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--emerald); background:#1c1c1e; border:1px solid var(--emerald); padding:3px 8px; }
-.chest-open{ margin-top:6px; align-self:flex-start; }
-.projects-cta{ display:flex; justify-content:center; margin-top:40px; }
+/* quick-nav menu */
+.quicknav{ position:fixed; inset:0; z-index:150; display:none; align-items:center; justify-content:center; }
+.quicknav.open{ display:flex; }
+.qn-backdrop{ position:absolute; inset:0; background:rgba(4,7,13,0.82); }
+.qn-panel{ position:relative; width:100%; max-width:380px; background:linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--panel-line); padding:26px; }
+.qn-panel h3{ font-size:15px; color:var(--gear5); letter-spacing:1px; margin-bottom:16px; text-align:center; }
+.qn-item{ display:flex; align-items:center; gap:12px; width:100%; padding:13px 14px; background:rgba(15,28,46,0.5); border:1px solid var(--panel-line); margin-bottom:8px; color:var(--gear5); font-size:13px; text-align:left; }
+.qn-item:hover{ border-color:var(--emerald); }
+.qn-item span.qi{ font-size:16px; }
 
-/* ===== CONTACT — NETHER PORTAL ===== */
-#contact{
-  background:radial-gradient(ellipse at 50% 20%, var(--nether) 0%, var(--nether2) 55%, #0c0212 100%);
-}
-.portal-layout{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; }
-.portal-title{ font-size:clamp(18px,3vw,28px); line-height:1.7; color:var(--white); margin-bottom:20px; text-shadow:3px 3px 0 #000; }
-.portal-title span{ color:var(--portal); }
-.portal-sub{ font-family:'JetBrains Mono',monospace; font-size:14px; color:#cbb8e8; line-height:1.7; margin-bottom:28px; }
-.portal-links{ display:flex; flex-direction:column; gap:12px; }
-.portal-link{ display:flex; align-items:center; gap:14px; padding:15px 18px; text-decoration:none; color:#d8cdec; transition:transform .12s; background:rgba(0,0,0,0.35); border:2px solid #4a2a70; }
-.portal-link:hover{ transform:translateX(4px); border-color:var(--portal); color:#fff; }
-.portal-link-icon{ width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:15px; background:#1a0a2a; flex-shrink:0; }
-.portal-link-label{ font-family:'Press Start 2P',cursive; font-size:7.5px; color:#8f6ab8; margin-bottom:4px; }
-.portal-link-value{ font-family:'JetBrains Mono',monospace; font-size:13.5px; overflow-wrap:anywhere; }
-
-.portal-frame{
-  position:relative; aspect-ratio:1/1.35; max-width:340px; margin:0 auto; padding:18px;
-  background:repeating-conic-gradient(#0e0511 0% 25%, #150a1c 0% 50%) 0/16px 16px;
-}
-.portal-inner{
-  position:absolute; inset:22px; overflow:hidden;
-  background:linear-gradient(160deg, #4a0fae, #9b3ff0, #4a0fae);
-  background-size:200% 200%; animation:swirl 4s ease infinite;
-}
-@keyframes swirl{ 0%,100%{ background-position:0% 0%; } 50%{ background-position:100% 100%; } }
-.portal-inner::before{
-  content:'⛏️'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:38px; opacity:0.85; filter:drop-shadow(0 0 12px #fff);
-}
-.party-badge{ display:inline-flex; align-items:center; gap:8px; font-size:9px; color:#111; background:var(--emerald); padding:6px 12px; margin-bottom:20px; }
-
-/* ===== FOOTER ===== */
-footer{
-  background:#0c0212; border-top:4px solid var(--nether); padding:28px 22px;
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
-}
-.footer-copy{ font-family:'JetBrains Mono',monospace; font-size:12px; color:#7c6a94; }
-.footer-copy span{ color:var(--gold); }
-.footer-links{ display:flex; gap:20px; }
-.footer-links a{ font-size:9px; color:#7c6a94; text-decoration:none; font-family:'Press Start 2P',cursive; }
-.footer-links a:hover{ color:var(--diamond); }
-
-/* reveal */
-.reveal{ opacity:0; transform:translateY(28px); transition:opacity .55s ease, transform .55s ease; }
-.reveal.visible{ opacity:1; transform:translateY(0); }
-.d1{ transition-delay:.08s; } .d2{ transition-delay:.16s; } .d3{ transition-delay:.24s; }
-
-@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; } }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width:1080px){
-  .stats-layout, .portal-layout{ grid-template-columns:1fr; }
-  .portal-layout{ text-align:center; }
-  .portal-links{ align-items:center; }
-  .portal-link{ width:100%; max-width:380px; }
-}
-@media (max-width:860px){
-  .chest-feat-grid, .chest-grid{ grid-template-columns:repeat(2,1fr); }
-}
 @media (max-width:768px){
-  .hotbar, nav > .mc-btn{ display:none; }
-  .nav-toggle{ display:flex; }
-  .mobile-menu{ display:flex; }
-  section{ padding:60px 18px; }
-  #hero{ padding:110px 16px 0; min-height:unset; }
-  .hero-desc{ font-size:13px; }
-  .hero-actions a{ flex:1 1 auto; justify-content:center; }
-  .craft-grid{ grid-template-columns:repeat(3,60px); grid-template-rows:repeat(3,60px); gap:6px; }
-  .craft-slot{ font-size:19px; }
-  .craft-layout{ gap:20px; }
-  .inv-slot{ width:56px; height:56px; font-size:19px; }
-  .chest-feat-grid, .chest-grid{ grid-template-columns:1fr; }
-  .stat-tag{ width:64px; font-size:8px; }
-  footer{ flex-direction:column; text-align:center; }
-  .footer-links{ justify-content:center; flex-wrap:wrap; }
-  .pixel-sun{ width:48px; height:48px; top:90px; right:24px; }
+  .modal{ padding:26px 18px 32px; max-height:90vh; }
+  .about-grid, .badge-grid, .crate-grid{ grid-template-columns:1fr; }
+  .route{ grid-template-columns:repeat(3,1fr); gap:10px 6px; }
+  .stop-node{ width:42px; height:42px; font-size:15px; }
+  .stop-tool{ font-size:8px; }
+  .hud-btn span.hb-txt{ display:none; }
+  .cam-hint{ display:none; }
 }
-@media (max-width:420px){
-  .craft-grid{ grid-template-columns:repeat(3,50px); grid-template-rows:repeat(3,50px); }
-  .craft-slot{ font-size:16px; }
-  .craft-output .out-slot{ width:66px; height:66px; font-size:26px; }
-  .hero-title{ letter-spacing:1px; }
-}
-@media (pointer:coarse){
-  a, button{ -webkit-tap-highlight-color:rgba(255,217,61,0.25); }
-  .footer-links a, .portal-link, .mc-btn{ min-height:40px; }
-  .craft-slot .slot-tip, .inv-slot .inv-tip{ display:none !important; }
-}
+@media (pointer:coarse){ .joystick{ display:block; } }
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; } }
 </style>
 </head>
 <body>
 
-<!-- NAV / HOTBAR -->
-<nav>
-  <a href="#hero" class="brand">
-    <div class="brand-slot bevel-out">⛏️</div>
-    <div>
-      <div class="brand-name">KARTAVYA</div>
-      <div class="brand-sub">DevSecOps.exe</div>
-    </div>
-  </a>
-  <ul class="hotbar">
-    <li><a href="#pipeline" class="bevel-out"><span class="hotbar-key">1</span>🔄</a></li>
-    <li><a href="#about" class="bevel-out"><span class="hotbar-key">2</span>📖</a></li>
-    <li><a href="#skills" class="bevel-out"><span class="hotbar-key">3</span>🎒</a></li>
-    <li><a href="#certifications" class="bevel-out"><span class="hotbar-key">4</span>🏆</a></li>
-    <li><a href="#projects" class="bevel-out"><span class="hotbar-key">5</span>📦</a></li>
-    <li><a href="#contact" class="bevel-out"><span class="hotbar-key">6</span>🌀</a></li>
-  </ul>
-  <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="mc-btn gold">RESUME</a>
-  <button class="nav-toggle bevel-out" id="navToggle" aria-label="inventory" aria-expanded="false">E</button>
-</nav>
-
-<div class="mobile-menu" id="mobileMenu">
-  <div class="mm-title">— INVENTORY —</div>
-  <a href="#pipeline"><span class="mi">🔄</span>PIPELINE</a>
-  <a href="#about"><span class="mi">📖</span>STATS</a>
-  <a href="#skills"><span class="mi">🎒</span>SKILLS</a>
-  <a href="#certifications"><span class="mi">🏆</span>TROPHIES</a>
-  <a href="#projects"><span class="mi">📦</span>PROJECTS</a>
-  <a href="#contact"><span class="mi">🌀</span>CONTACT</a>
-  <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="mc-btn gold mm-cta">RESUME</a>
+<!-- ============ LOADER ============ -->
+<div id="loader">
+  <canvas id="loaderCanvas"></canvas>
+  <div class="ld-fallback ld-stars" id="ldFallback"></div>
+  <div class="ld-text">
+    <div class="ld-title display">PROVISIONING YOUR ISLAND</div>
+    <div class="ld-pct mono" id="ldPct">0%</div>
+    <div class="ld-bar"><div class="ld-bar-fill" id="ldBarFill"></div></div>
+    <div class="ld-log mono" id="ldLog">$ booting explorer.sh</div>
+    <div class="ld-skip mono">tap anywhere to skip ▸</div>
+  </div>
 </div>
 
-<!-- HERO — OVERWORLD -->
-<section id="hero">
-  <div class="pixel-sun"></div>
-  <div class="cloud c1"></div>
-  <div class="cloud c2"></div>
-  <div class="cloud c3"></div>
+<!-- ============ NO-WEBGL FALLBACK ============ -->
+<div id="fallback">
+  <div class="fb-wrap">
+    <h1 class="display">KARTAVYA NIRWEL</h1>
+    <div class="fb-tag mono">DevSecOps Engineer in the Making</div>
+    <p>Final-year CS student building real pipelines, not just diagrams of them. Java/Spring Boot foundations, Docker → Kubernetes runtime, Jenkins → ArgoCD GitOps delivery, Terraform on AWS underneath it all.</p>
 
-  <div class="hero-inner">
-    <div class="avatar-slot bevel-out">⛏️</div>
-    <h1 class="hero-title">
-      KARTAVYA NIRWEL
-      <span class="splash">100% Deployed!</span>
-    </h1>
-    <div class="hero-tag">▸ DEVSECOPS ENGINEER IN THE MAKING ◂</div>
-    <p class="hero-desc">
-      Final-year CS student building real pipelines, not just diagrams of them. <b>Java/Spring Boot</b> foundations,
-      <b>Docker → Kubernetes</b> runtime, <b>Jenkins → ArgoCD</b> GitOps delivery, <b>Terraform on AWS</b> underneath it all.
-    </p>
-    <div class="hero-actions">
-      <a href="#pipeline" class="mc-btn gold">⛏ CRAFT THE PIPELINE</a>
-      <a href="#projects" class="mc-btn">📦 OPEN PROJECT CHESTS</a>
+    <h2 class="display">Deployment Route</h2>
+    <ul>
+      <li>Commit — Git · GitHub</li><li>Build — Jenkins</li><li>SAST — SonarQube Quality Gate</li>
+      <li>SCA — OWASP Dependency-Check</li><li>Scan — Trivy container scan</li><li>Push — Docker registry</li>
+      <li>Sync — ArgoCD GitOps</li><li>Observe — Prometheus · Grafana · Loki · Tempo</li>
+      <li>DAST — pending (OWASP ZAP, jenkins-user permissions bug)</li>
+    </ul>
+
+    <h2 class="display">About</h2>
+    <p>Started as a Java/Spring Boot developer — still the main tool — but the recent focus has been everything after the code is written: build it, scan it, ship it, watch it. Final-year B.Tech CS, Acropolis Institute of Technology &amp; Research, Indore (2023–2027).</p>
+
+    <h2 class="display">Arsenal</h2>
+    <p>Jenkins, ArgoCD, Docker, Kubernetes, Helm, K3s/EKS, SonarQube, OWASP Dependency-Check, Trivy, OWASP ZAP, Gitleaks, Checkov, Vault, Terraform, EC2/VPC/S3, RDS, IAM/IRSA, Prometheus, Grafana, Loki, Tempo, Java, Spring Boot/Spring AI, Python, FastAPI, Bash.</p>
+
+    <h2 class="display">Certifications</h2>
+    <ul>
+      <li>AWS Certified Solutions Architect – Associate</li><li>AWS Certified Cloud Practitioner</li>
+      <li>Spring Boot Essentials — Infosys Springboard</li><li>Programming in Java — Elite+Gold, NPTEL / IIT Kharagpur, 2026</li>
+    </ul>
+
+    <h2 class="display">Featured Projects</h2>
+    <ul>
+      <li>DevHub 2.0 — Full DevSecOps Pipeline (React/Spring Boot/K3s, Jenkins→ArgoCD, SonarQube/Trivy)</li>
+      <li>StatusPulse — Uptime &amp; Incident Monitoring (Spring Boot, FastAPI, Kubernetes)</li>
+      <li>Terra &amp; Oak — Ecommerce Microservices (Helm, Kubernetes, MySQL)</li>
+      <li>QuickCart — Microservices Commerce (Jenkins, Docker, FastAPI)</li>
+    </ul>
+
+    <h2 class="display">Contact</h2>
+    <ul>
+      <li>Email — kartavyanirwell@gmail.com</li>
+      <li>LinkedIn — linkedin.com/in/kartavya-nirwel-0b7202326</li>
+      <li>GitHub — github.com/kartavynirwel-code</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ 3D CANVAS ============ -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- ============ HUD ============ -->
+<div class="hud" id="hud">
+  <div class="hud-top">
+    <div class="hud-brand">
+      <svg class="hb-mark" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" stroke="#e3b661" stroke-width="1.2" opacity="0.7"/>
+        <path d="M20 8 L23 19 L20 32 L17 19 Z" fill="#22e0a4"/>
+        <circle cx="20" cy="20" r="2" fill="#f8f6ee"/>
+      </svg>
+      <div><div class="hb-name display">KARTAVYA NIRWEL</div><div class="hb-sub">DevSecOps · Island Build</div></div>
     </div>
-    <div class="hero-coins">
-      <div class="coin-chip"><b>15+</b> repos mined</div>
-      <div class="coin-chip"><b>2×</b> AWS certified</div>
-      <div class="coin-chip"><b>4+</b> pipelines shipped</div>
+    <div class="hud-actions">
+      <button class="hud-btn" id="btnSections">☰ <span class="hb-txt">Sections</span></button>
+      <a class="hud-btn gold" id="btnResume" href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank">📄 <span class="hb-txt">Resume</span></a>
     </div>
-    <div class="scroll-hint">▼ scroll down to keep mining ▼</div>
   </div>
 
-  <div class="ground">
-    <div class="ground-grass"></div>
-    <div class="ground-dirt"></div>
+  <div class="hud-hint mono" id="hudHint">WASD / arrows or the joystick to walk · drag to look around · walk up to a beacon to open it</div>
+
+  <div class="joystick" id="joystick"><div class="joy-nub" id="joyNub"></div></div>
+  <div class="cam-hint mono">drag screen<br>to look around</div>
+
+  <div class="prompt" id="prompt">
+    <div class="prompt-key">↵</div>
+    <div class="prompt-label mono" id="promptLabel">Open</div>
   </div>
-</section>
+</div>
 
-<!-- CRAFTING TABLE — PIPELINE -->
-<section id="pipeline">
-  <div class="section-eyebrow">// CRAFTING TABLE</div>
-  <h2 class="section-title">Recipe: DevSecOps Pipeline</h2>
-  <p class="craft-desc">This is the exact recipe behind DevHub 2.0 — every commit is crafted through these ingredients before the output ships.</p>
-
-  <div class="craft-layout reveal">
-    <div class="craft-grid">
-      <div class="craft-slot bevel-in">📝<span class="slot-label">COMMIT</span><span class="slot-tip">Git · GitHub</span></div>
-      <div class="craft-slot bevel-in">🔧<span class="slot-label">BUILD</span><span class="slot-tip">Jenkins</span></div>
-      <div class="craft-slot bevel-in">🛡️<span class="slot-label">SAST</span><span class="slot-tip">SonarQube Quality Gate</span></div>
-      <div class="craft-slot bevel-in">📦<span class="slot-label">SCA</span><span class="slot-tip">OWASP Dependency-Check</span></div>
-      <div class="craft-slot bevel-in">🔍<span class="slot-label">SCAN</span><span class="slot-tip">Trivy container scan</span></div>
-      <div class="craft-slot bevel-in">🚚<span class="slot-label">PUSH</span><span class="slot-tip">Docker registry</span></div>
-      <div class="craft-slot bevel-in">🔄<span class="slot-label">SYNC</span><span class="slot-tip">ArgoCD GitOps</span></div>
-      <div class="craft-slot bevel-in">📊<span class="slot-label">OBSERVE</span><span class="slot-tip">Prometheus·Grafana·Loki·Tempo</span></div>
-      <div class="craft-slot bevel-in" style="opacity:0.3">⬛<span class="slot-label">DAST — pending</span></div>
-    </div>
-
-    <div class="craft-arrow">➜</div>
-
-    <div class="craft-output">
-      <div class="out-slot bevel-out">✅</div>
-      <div class="out-label">DEPLOYED · HEALTHY · OBSERVED</div>
-    </div>
+<!-- ============ QUICK NAV ============ -->
+<div class="quicknav" id="quicknav">
+  <div class="qn-backdrop" id="qnBackdrop"></div>
+  <div class="qn-panel">
+    <h3 class="display">Jump to a Section</h3>
+    <button class="qn-item" data-open="about"><span class="qi">🧑‍✈️</span> Command Deck — About</button>
+    <button class="qn-item" data-open="skills"><span class="qi">⚒️</span> The Forge — Skills</button>
+    <button class="qn-item" data-open="pipeline"><span class="qi">📡</span> Nav Tower — Pipeline</button>
+    <button class="qn-item" data-open="certs"><span class="qi">🏆</span> Trophy Hold — Certifications</button>
+    <button class="qn-item" data-open="projects"><span class="qi">📦</span> The Docks — Projects</button>
+    <button class="qn-item" data-open="contact"><span class="qi">🗼</span> Lighthouse — Contact</button>
   </div>
+</div>
 
-  <div class="craft-legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div> Crafted & enforced before merge</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> DAST (OWASP ZAP) — parked on a jenkins-user permissions bug</div>
-  </div>
-</section>
-
-<!-- STATS BOOK — ABOUT -->
-<section id="about">
-  <div class="section-eyebrow">// STATS BOOK</div>
-  <h2 class="section-title">Player Stats</h2>
-
-  <div class="stats-layout">
-    <div class="stats-card panel-block reveal">
-      <div class="stats-head">
-        <div class="stats-portrait bevel-out">🧑‍💻</div>
-        <div>
-          <div class="stats-name">KARTAVYA NIRWEL</div>
-          <div class="stats-class">CLASS: DevSecOps Engineer</div>
+<!-- ============ MODALS ============ -->
+<div class="modal-layer" id="modal-about">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">Command Deck</div>
+    <h2 class="modal-title display">Bio &amp; Stats</h2>
+    <div class="about-grid">
+      <div>
+        <div class="stat-row"><div class="stat-tag">Backend</div><div class="stat-bars"><div class="bar-seg on a"></div><div class="bar-seg on a"></div><div class="bar-seg on a"></div><div class="bar-seg on a"></div><div class="bar-seg"></div></div></div>
+        <div class="stat-row"><div class="stat-tag">K8s / Ops</div><div class="stat-bars"><div class="bar-seg on b"></div><div class="bar-seg on b"></div><div class="bar-seg on b"></div><div class="bar-seg"></div><div class="bar-seg"></div></div></div>
+        <div class="stat-row"><div class="stat-tag">Security</div><div class="stat-bars"><div class="bar-seg on c"></div><div class="bar-seg on c"></div><div class="bar-seg on c"></div><div class="bar-seg"></div><div class="bar-seg"></div></div></div>
+        <div class="stat-row"><div class="stat-tag">Cloud / IaC</div><div class="stat-bars"><div class="bar-seg on d"></div><div class="bar-seg on d"></div><div class="bar-seg on d"></div><div class="bar-seg on d"></div><div class="bar-seg"></div></div></div>
+        <div class="stat-row"><div class="stat-tag">Observe</div><div class="stat-bars"><div class="bar-seg on e"></div><div class="bar-seg on e"></div><div class="bar-seg"></div><div class="bar-seg"></div><div class="bar-seg"></div></div></div>
+        <div class="log-book">
+          <h4>Captain's Log</h4>
+          <div class="log-item"><span>▸</span> Final-year B.Tech CS, Acropolis Institute of Technology &amp; Research, Indore (2023–2027)</div>
+          <div class="log-item"><span>▸</span> Grinding campus placements — DevOps / DevSecOps roles</div>
+          <div class="log-item"><span>▸</span> Next boss fight: DAST (OWASP ZAP) permissions bug</div>
         </div>
       </div>
-
-      <div class="stat-row"><div class="stat-tag">BACKEND</div><div class="stat-hearts">
-        <div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg on"></div><div class="heart-seg"></div>
-      </div></div>
-      <div class="stat-row"><div class="stat-tag">K8s/OPS</div><div class="stat-hearts">
-        <div class="heart-seg on xp"></div><div class="heart-seg on xp"></div><div class="heart-seg on xp"></div><div class="heart-seg"></div><div class="heart-seg"></div>
-      </div></div>
-      <div class="stat-row"><div class="stat-tag">SECURITY</div><div class="stat-hearts">
-        <div class="heart-seg on cloud"></div><div class="heart-seg on cloud"></div><div class="heart-seg on cloud"></div><div class="heart-seg"></div><div class="heart-seg"></div>
-      </div></div>
-      <div class="stat-row"><div class="stat-tag">CLOUD/IaC</div><div class="stat-hearts">
-        <div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg on gold"></div><div class="heart-seg"></div>
-      </div></div>
-      <div class="stat-row"><div class="stat-tag">OBSERVE</div><div class="stat-hearts">
-        <div class="heart-seg on purple"></div><div class="heart-seg on purple"></div><div class="heart-seg"></div><div class="heart-seg"></div><div class="heart-seg"></div>
-      </div></div>
-
-      <div class="log-book bevel-in">
-        <h4>QUEST LOG</h4>
-        <div class="log-item"><span>▸</span> Final-year B.Tech CS, Acropolis Institute of Technology & Research, Indore (2023–2027)</div>
-        <div class="log-item"><span>▸</span> Grinding campus placements — DevOps/DevSecOps roles</div>
-        <div class="log-item"><span>▸</span> Next boss fight: DAST (OWASP ZAP) permissions bug</div>
-      </div>
-    </div>
-
-    <div class="about-text reveal d1">
-      <p>I started as a <b>Java/Spring Boot developer</b> — still my main tool — but the last stretch of this run has been about everything after the code is written: build it, scan it, ship it, watch it, without a human babysitting every step.</p>
-      <p>That means writing my own <b>Kubernetes manifests</b> instead of copy-pasting tutorials, wiring a full <b>Jenkins → ArgoCD GitOps pipeline</b> end to end, and mining through real cluster bugs — NodePort ranges, CrashLoopBackOffs, selector mismatches — until the health check actually turns green.</p>
-      <p>Loot acquired: <b>AWS Certified Solutions Architect – Associate</b> + <b>AWS Certified Cloud Practitioner</b>. Currently side-questing through Terraform, Vault, and the LGTM observability stack.</p>
-    </div>
-  </div>
-</section>
-
-<!-- INVENTORY — SKILLS -->
-<section id="skills">
-  <div class="section-eyebrow">// INVENTORY</div>
-  <h2 class="section-title">Skills Inventory</h2>
-
-  <div class="inv-group reveal">
-    <div class="inv-group-title">🔄 CI/CD & GITOPS</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">🧩<span class="inv-tip">Jenkins</span></div>
-      <div class="inv-slot bevel-in">🔁<span class="inv-tip">ArgoCD</span></div>
-      <div class="inv-slot bevel-in">📚<span class="inv-tip">App-of-Apps pattern</span></div>
-      <div class="inv-slot bevel-in">🪝<span class="inv-tip">Webhooks</span></div>
-    </div>
-  </div>
-
-  <div class="inv-group reveal d1">
-    <div class="inv-group-title">🐳 CONTAINERS & ORCHESTRATION</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">🐋<span class="inv-tip">Docker</span></div>
-      <div class="inv-slot bevel-in">☸️<span class="inv-tip">Kubernetes</span></div>
-      <div class="inv-slot bevel-in">⛵<span class="inv-tip">Helm</span></div>
-      <div class="inv-slot bevel-in">🌐<span class="inv-tip">K3s / EKS</span></div>
-      <div class="inv-slot bevel-in">🔌<span class="inv-tip">MetalLB</span></div>
-    </div>
-  </div>
-
-  <div class="inv-group reveal d2">
-    <div class="inv-group-title">🛡️ DEVSECOPS TOOLING</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">🧪<span class="inv-tip">SonarQube</span></div>
-      <div class="inv-slot bevel-in">📦<span class="inv-tip">OWASP Dependency-Check</span></div>
-      <div class="inv-slot bevel-in">🔬<span class="inv-tip">Trivy</span></div>
-      <div class="inv-slot bevel-in">🕷️<span class="inv-tip">OWASP ZAP</span></div>
-      <div class="inv-slot bevel-in">🔑<span class="inv-tip">Gitleaks</span></div>
-      <div class="inv-slot bevel-in">✅<span class="inv-tip">Checkov</span></div>
-      <div class="inv-slot bevel-in">🔐<span class="inv-tip">Vault</span></div>
-    </div>
-  </div>
-
-  <div class="inv-group reveal">
-    <div class="inv-group-title">☁️ IaC & AWS CLOUD</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">🌍<span class="inv-tip">Terraform</span></div>
-      <div class="inv-slot bevel-in">🖥️<span class="inv-tip">EC2 · VPC · S3</span></div>
-      <div class="inv-slot bevel-in">☸️<span class="inv-tip">EKS</span></div>
-      <div class="inv-slot bevel-in">🗄️<span class="inv-tip">RDS</span></div>
-      <div class="inv-slot bevel-in">🪪<span class="inv-tip">IAM / IRSA</span></div>
-    </div>
-  </div>
-
-  <div class="inv-group reveal d1">
-    <div class="inv-group-title">📊 OBSERVABILITY</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">🔥<span class="inv-tip">Prometheus</span></div>
-      <div class="inv-slot bevel-in">📈<span class="inv-tip">Grafana</span></div>
-      <div class="inv-slot bevel-in">📜<span class="inv-tip">Loki</span></div>
-      <div class="inv-slot bevel-in">🧵<span class="inv-tip">Tempo</span></div>
-      <div class="inv-slot bevel-in">🧮<span class="inv-tip">PromQL</span></div>
-    </div>
-  </div>
-
-  <div class="inv-group reveal d2">
-    <div class="inv-group-title">⚔️ LANGUAGES & BACKEND</div>
-    <div class="inv-row">
-      <div class="inv-slot bevel-in">☕<span class="inv-tip">Java</span></div>
-      <div class="inv-slot bevel-in">🍃<span class="inv-tip">Spring Boot / Spring AI</span></div>
-      <div class="inv-slot bevel-in">🐍<span class="inv-tip">Python</span></div>
-      <div class="inv-slot bevel-in">⚡<span class="inv-tip">FastAPI</span></div>
-      <div class="inv-slot bevel-in">🐚<span class="inv-tip">Bash</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ACHIEVEMENTS -->
-<section id="certifications">
-  <div class="section-eyebrow">// ACHIEVEMENTS</div>
-  <h2 class="section-title">Trophy Case</h2>
-
-  <div class="toast-stack">
-    <div class="toast reveal">
-      <div class="toast-icon">☁️</div>
-      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">AWS Certified Solutions Architect – Associate</div><div class="toast-issuer">AMAZON WEB SERVICES</div></div>
-    </div>
-    <div class="toast reveal d1">
-      <div class="toast-icon">🌩️</div>
-      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">AWS Certified Cloud Practitioner</div><div class="toast-issuer">AMAZON WEB SERVICES</div></div>
-    </div>
-    <div class="toast reveal d2">
-      <div class="toast-icon">🌱</div>
-      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">Spring Boot Essentials</div><div class="toast-issuer">INFOSYS SPRINGBOARD</div></div>
-    </div>
-    <div class="toast reveal d3">
-      <div class="toast-icon">🏅</div>
-      <div><div class="toast-title">ACHIEVEMENT GET!</div><div class="toast-name">Programming in Java — Elite + Gold</div><div class="toast-issuer">NPTEL · IIT KHARAGPUR · 2026</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- LOOT CHESTS — PROJECTS -->
-<section id="projects">
-  <div class="section-eyebrow">// LOOT CHESTS</div>
-  <h2 class="section-title">Project Chests</h2>
-
-  <div class="chest-feat-grid">
-    <a href="https://github.com/kartavynirwel-code/DevHub-2.0" target="_blank" class="chest-card legendary panel-block reveal">
-      <div class="chest-head"><span class="chest-icon">🛡️</span><span class="chest-diff legendary">LEGENDARY</span></div>
-      <div class="chest-name n-legendary">DevHub 2.0 — Full DevSecOps Pipeline</div>
-      <div class="chest-desc">React + Spring Boot + MySQL on K3s (EC2). Complete Jenkins → ArgoCD GitOps pipeline: SonarQube Quality Gate (SAST), OWASP Dependency-Check (SCA), Trivy (container scan) all gating the merge. MetalLB provisions LoadBalancer IPs.</div>
-      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">ArgoCD</span><span class="loot-tag">SonarQube</span><span class="loot-tag">Trivy</span></div>
-      <span class="mc-btn gold small chest-open">OPEN CHEST ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/StatusPulse" target="_blank" class="chest-card legendary panel-block reveal d1">
-      <div class="chest-head"><span class="chest-icon">📡</span><span class="chest-diff legendary">LEGENDARY</span></div>
-      <div class="chest-name n-legendary">StatusPulse — Uptime & Incident Monitoring</div>
-      <div class="chest-desc">Monitor-service (Java/Spring Boot), alert-service (Python/FastAPI), React frontend on EC2 with hand-written K8s manifests. Cleared NodePort ranges, VITE_API_BASE_URL browser resolution, and Service naming bugs.</div>
-      <div class="chest-loot"><span class="loot-tag">Spring Boot</span><span class="loot-tag">FastAPI</span><span class="loot-tag">Kubernetes</span></div>
-      <span class="mc-btn gold small chest-open">OPEN CHEST ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/ecommerce-microservices" target="_blank" class="chest-card panel-block reveal d2">
-      <div class="chest-head"><span class="chest-icon">🌳</span><span class="chest-diff epic">EPIC</span></div>
-      <div class="chest-name n-epic">Terra & Oak — Ecommerce Microservices</div>
-      <div class="chest-desc">Auth, product, order, cart, frontend (Spring Boot/FastAPI/Node.js + Vite/React + MySQL) migrated Compose → Kubernetes via a generic Helm chart. Boss fights: CrashLoopBackOffs, selector mismatches, per-service DB users.</div>
-      <div class="chest-loot"><span class="loot-tag">Helm</span><span class="loot-tag">Kubernetes</span><span class="loot-tag">MySQL</span></div>
-      <span class="mc-btn small chest-open">OPEN CHEST ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/QuickCart-Microservices" target="_blank" class="chest-card panel-block reveal d3">
-      <div class="chest-head"><span class="chest-icon">🛒</span><span class="chest-diff epic">EPIC</span></div>
-      <div class="chest-name n-epic">QuickCart — Microservices Commerce</div>
-      <div class="chest-desc">React + Spring Boot + FastAPI + MySQL StatefulSet on Minikube & EC2. Full Jenkins pipeline: Docker build w/ frontend build-args, push, K8s deploy. Fixed OOMKilled pods, CORS, build-time env baking.</div>
-      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">Docker</span><span class="loot-tag">FastAPI</span></div>
-      <span class="mc-btn small chest-open">OPEN CHEST ▸</span>
-    </a>
-  </div>
-
-  <div class="chest-grid">
-    <a href="https://github.com/kartavynirwel-code/Devops-plates" target="_blank" class="chest-card panel-block reveal">
-      <div class="chest-head"><span class="chest-icon">📐</span><span class="chest-diff rare">RARE</span></div>
-      <div class="chest-name n-rare">Devops-plates</div>
-      <div class="chest-desc">22+ section reference repo — hand-written Terraform modules, Nginx Ingress TLS guides, Prometheus/Grafana notes, DAST troubleshooting docs.</div>
-      <div class="chest-loot"><span class="loot-tag">Terraform</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/DevHub" target="_blank" class="chest-card panel-block reveal d1">
-      <div class="chest-head"><span class="chest-icon">⚙️</span><span class="chest-diff rare">RARE</span></div>
-      <div class="chest-name n-rare">DevHub (v1)</div>
-      <div class="chest-desc">The original CI/CD build — Jenkins → ArgoCD → Minikube/K3s — foundation for DevHub 2.0.</div>
-      <div class="chest-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">ArgoCD</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/FoodHub" target="_blank" class="chest-card panel-block reveal d2">
-      <div class="chest-head"><span class="chest-icon">🍔</span><span class="chest-diff rare">RARE</span></div>
-      <div class="chest-name n-rare">FoodHub</div>
-      <div class="chest-desc">Four-service microservices with Spring Cloud Gateway. JWT auth, IDOR fixes, restricted CORS, non-root Dockerfiles.</div>
-      <div class="chest-loot"><span class="loot-tag">JWT</span><span class="loot-tag">Gateway</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/PayEase" target="_blank" class="chest-card panel-block reveal d3">
-      <div class="chest-head"><span class="chest-icon">💳</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">PayEase</div>
-      <div class="chest-desc">Java payments app on Spring Boot with REST APIs, clean transactional backend design.</div>
-      <div class="chest-loot"><span class="loot-tag">Spring Boot</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/AI-HelpDesk" target="_blank" class="chest-card panel-block reveal">
-      <div class="chest-head"><span class="chest-icon">🤖</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">AI HelpDesk</div>
-      <div class="chest-desc">Spring AI helpdesk handling user queries with AI-driven responses on Java Spring Boot.</div>
-      <div class="chest-loot"><span class="loot-tag">Spring AI</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/CareerConnect-Student-Guide" target="_blank" class="chest-card panel-block reveal d1">
-      <div class="chest-head"><span class="chest-icon">🎓</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">CareerConnect Student Guide</div>
-      <div class="chest-desc">Career guidance platform bridging academics and jobs, built on Java backend architecture.</div>
-      <div class="chest-loot"><span class="loot-tag">Java</span><span class="loot-tag">MySQL</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/Gravity-Assistant" target="_blank" class="chest-card panel-block reveal d2">
-      <div class="chest-head"><span class="chest-icon">🚀</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">Gravity Assistant</div>
-      <div class="chest-desc">AI-powered Java assistant app demonstrating automation on a Spring Boot backend.</div>
-      <div class="chest-loot"><span class="loot-tag">Java</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/Endless-Browser-Al-Assistant-Browser" target="_blank" class="chest-card panel-block reveal d3">
-      <div class="chest-head"><span class="chest-icon">🌐</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">Endless Browser AI Assistant</div>
-      <div class="chest-desc">JavaScript-based AI assistant integrated into a browser interface for contextual help.</div>
-      <div class="chest-loot"><span class="loot-tag">JavaScript</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/FineSnap" target="_blank" class="chest-card panel-block reveal">
-      <div class="chest-head"><span class="chest-icon">📸</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">FineSnap</div>
-      <div class="chest-desc">Java app with MVC architecture and RESTful design for image-related functionality.</div>
-      <div class="chest-loot"><span class="loot-tag">Java</span><span class="loot-tag">MVC</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-    <a href="https://github.com/kartavynirwel-code/Library_management" target="_blank" class="chest-card panel-block reveal d1">
-      <div class="chest-head"><span class="chest-icon">📚</span><span class="chest-diff common">COMMON</span></div>
-      <div class="chest-name n-common">Library Management System</div>
-      <div class="chest-desc">Full-featured library app: book inventory, member management, borrowing records. Java, JDBC, MySQL.</div>
-      <div class="chest-loot"><span class="loot-tag">JDBC</span><span class="loot-tag">MySQL</span></div>
-      <span class="mc-btn small chest-open">OPEN ▸</span>
-    </a>
-  </div>
-
-  <div class="projects-cta">
-    <a href="https://github.com/kartavynirwel-code" target="_blank" class="mc-btn gold">VIEW ALL REPOS ON GITHUB ▸</a>
-  </div>
-</section>
-
-<!-- CONTACT — NETHER PORTAL -->
-<section id="contact">
-  <div class="section-eyebrow">// THE NETHER</div>
-  <h2 class="section-title">Enter the Portal</h2>
-
-  <div class="portal-layout">
-    <div class="reveal">
-      <div class="party-badge">● LOOKING FOR PARTY</div>
-      <h3 class="portal-title">Let's co-op on<br>something <span>secure</span>.</h3>
-      <p class="portal-sub">Open to DevOps/DevSecOps internships, entry-level roles, cloud infra projects, and collaborations. Step through and send an invite.</p>
-      <div class="portal-links">
-        <a href="mailto:kartavyanirwell@gmail.com" class="portal-link">
-          <div class="portal-link-icon">✉️</div>
-          <div><div class="portal-link-label">EMAIL</div><div class="portal-link-value">kartavyanirwell@gmail.com</div></div>
-        </a>
-        <a href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank" class="portal-link">
-          <div class="portal-link-icon">💼</div>
-          <div><div class="portal-link-label">LINKEDIN</div><div class="portal-link-value">kartavya-nirwel-0b7202326</div></div>
-        </a>
-        <a href="https://github.com/kartavynirwel-code" target="_blank" class="portal-link">
-          <div class="portal-link-icon">🐙</div>
-          <div><div class="portal-link-label">GITHUB</div><div class="portal-link-value">kartavynirwel-code</div></div>
-        </a>
-        <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="portal-link">
-          <div class="portal-link-icon">📄</div>
-          <div><div class="portal-link-label">RESUME</div><div class="portal-link-value">Download PDF</div></div>
-        </a>
-      </div>
-    </div>
-
-    <div class="reveal d1">
-      <div class="portal-frame">
-        <div class="portal-inner"></div>
+      <div class="about-text">
+        <p>Started as a <b>Java/Spring Boot developer</b> — still my main tool — but the last stretch has been about everything after the code is written: build it, scan it, ship it, watch it, without a human babysitting every step.</p>
+        <p>That means writing my own <span class="g">Kubernetes manifests</span> instead of copy-pasting tutorials, wiring a full <b>Jenkins → ArgoCD GitOps pipeline</b> end to end, and pushing through real cluster issues — NodePort ranges, CrashLoopBackOffs, selector mismatches — until the health check finally turns green.</p>
+        <p>Certified: <span class="g">AWS Solutions Architect – Associate</span> + <span class="g">AWS Cloud Practitioner</span>. Currently working through Terraform, Vault, and the LGTM observability stack.</p>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<footer>
-  <div class="footer-copy">© 2026 <span>KARTAVYA NIRWEL</span> · WORLD SAVED VIA ARGOCD</div>
-  <div class="footer-links">
-    <a href="https://github.com/kartavynirwel-code" target="_blank">GITHUB</a>
-    <a href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank">LINKEDIN</a>
-    <a href="mailto:kartavyanirwell@gmail.com">EMAIL</a>
+<div class="modal-layer" id="modal-skills">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">The Forge</div>
+    <h2 class="modal-title display">Skills &amp; Tooling</h2>
+    <div class="modal-sub">Every tool in the rack, grouped by discipline.</div>
+    <div class="arsenal-group"><div class="arsenal-group-title">🔄 CI/CD &amp; GitOps</div><div class="arsenal-row">
+      <div class="blade">🧩 Jenkins</div><div class="blade">🔁 ArgoCD</div><div class="blade">📚 App-of-Apps pattern</div><div class="blade">🪝 Webhooks</div>
+    </div></div>
+    <div class="arsenal-group"><div class="arsenal-group-title">🐳 Containers &amp; Orchestration</div><div class="arsenal-row">
+      <div class="blade">🐋 Docker</div><div class="blade">☸️ Kubernetes</div><div class="blade">⛵ Helm</div><div class="blade">🌐 K3s / EKS</div><div class="blade">🔌 MetalLB</div>
+    </div></div>
+    <div class="arsenal-group"><div class="arsenal-group-title">🛡️ DevSecOps Tooling</div><div class="arsenal-row">
+      <div class="blade">🧪 SonarQube</div><div class="blade">📦 OWASP Dependency-Check</div><div class="blade">🔬 Trivy</div><div class="blade">🕷️ OWASP ZAP</div><div class="blade">🔑 Gitleaks</div><div class="blade">✅ Checkov</div><div class="blade">🔐 Vault</div>
+    </div></div>
+    <div class="arsenal-group"><div class="arsenal-group-title">☁️ IaC &amp; AWS Cloud</div><div class="arsenal-row">
+      <div class="blade">🌍 Terraform</div><div class="blade">🖥️ EC2 · VPC · S3</div><div class="blade">☸️ EKS</div><div class="blade">🗄️ RDS</div><div class="blade">🪪 IAM / IRSA</div>
+    </div></div>
+    <div class="arsenal-group"><div class="arsenal-group-title">📊 Observability</div><div class="arsenal-row">
+      <div class="blade">🔥 Prometheus</div><div class="blade">📈 Grafana</div><div class="blade">📜 Loki</div><div class="blade">🧵 Tempo</div><div class="blade">🧮 PromQL</div>
+    </div></div>
+    <div class="arsenal-group"><div class="arsenal-group-title">⚔️ Languages &amp; Backend</div><div class="arsenal-row">
+      <div class="blade">☕ Java</div><div class="blade">🍃 Spring Boot / Spring AI</div><div class="blade">🐍 Python</div><div class="blade">⚡ FastAPI</div><div class="blade">🐚 Bash</div>
+    </div></div>
   </div>
-</footer>
+</div>
 
+<div class="modal-layer" id="modal-pipeline">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">Nav Tower</div>
+    <h2 class="modal-title display">Deployment Route</h2>
+    <div class="modal-sub">Every commit sails this exact route before it reaches port.</div>
+    <div class="route">
+      <div class="stop"><div class="stop-node">📝</div><div class="stop-label">Commit</div><div class="stop-tool mono">Git · GitHub</div></div>
+      <div class="stop"><div class="stop-node">🔧</div><div class="stop-label">Build</div><div class="stop-tool mono">Jenkins</div></div>
+      <div class="stop"><div class="stop-node">🛡️</div><div class="stop-label">SAST</div><div class="stop-tool mono">SonarQube Gate</div></div>
+      <div class="stop"><div class="stop-node">📦</div><div class="stop-label">SCA</div><div class="stop-tool mono">OWASP Dep-Check</div></div>
+      <div class="stop"><div class="stop-node">🔍</div><div class="stop-label">Scan</div><div class="stop-tool mono">Trivy</div></div>
+      <div class="stop"><div class="stop-node">🚚</div><div class="stop-label">Push</div><div class="stop-tool mono">Docker registry</div></div>
+      <div class="stop"><div class="stop-node">🔄</div><div class="stop-label">Sync</div><div class="stop-tool mono">ArgoCD GitOps</div></div>
+      <div class="stop"><div class="stop-node">📊</div><div class="stop-label">Observe</div><div class="stop-tool mono">Prometheus·Grafana</div></div>
+      <div class="stop pending"><div class="stop-node">⬛</div><div class="stop-label">DAST</div><div class="stop-tool mono">pending</div></div>
+    </div>
+    <div class="route-final"><div class="flag">🏁</div><div class="flag-label">Deployed · Healthy · Observed</div></div>
+    <div class="route-note mono">DAST (OWASP ZAP) is anchored on a jenkins-user permissions bug — currently being debugged.</div>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-certs">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">Trophy Hold</div>
+    <h2 class="modal-title display">Certifications</h2>
+    <div class="badge-grid">
+      <div class="badge-card"><div class="badge-icon">☁️</div><div><div class="badge-tag">Verified</div><div class="badge-name">AWS Certified Solutions Architect – Associate</div><div class="badge-issuer">Amazon Web Services</div></div></div>
+      <div class="badge-card"><div class="badge-icon">🌩️</div><div><div class="badge-tag">Verified</div><div class="badge-name">AWS Certified Cloud Practitioner</div><div class="badge-issuer">Amazon Web Services</div></div></div>
+      <div class="badge-card"><div class="badge-icon">🌱</div><div><div class="badge-tag">Verified</div><div class="badge-name">Spring Boot Essentials</div><div class="badge-issuer">Infosys Springboard</div></div></div>
+      <div class="badge-card"><div class="badge-icon">🏅</div><div><div class="badge-tag">Verified</div><div class="badge-name">Programming in Java — Elite + Gold</div><div class="badge-issuer">NPTEL · IIT Kharagpur · 2026</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-projects">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">The Docks</div>
+    <h2 class="modal-title display">Featured Builds</h2>
+    <div class="crate-grid">
+      <a href="https://github.com/kartavynirwel-code/DevHub-2.0" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">🛡️</span><span class="crate-tier flagship">Flagship</span></div>
+        <div class="crate-name">DevHub 2.0 — Full DevSecOps Pipeline</div>
+        <div class="crate-desc">React + Spring Boot + MySQL on K3s (EC2). Full Jenkins → ArgoCD GitOps pipeline: SonarQube, OWASP Dependency-Check, Trivy all gating the merge.</div>
+        <div class="crate-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">ArgoCD</span><span class="loot-tag">SonarQube</span></div>
+      </a>
+      <a href="https://github.com/kartavynirwel-code/StatusPulse" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">📡</span><span class="crate-tier flagship">Flagship</span></div>
+        <div class="crate-name">StatusPulse — Uptime &amp; Incident Monitoring</div>
+        <div class="crate-desc">Monitor-service (Spring Boot), alert-service (FastAPI), React frontend on hand-written K8s manifests.</div>
+        <div class="crate-loot"><span class="loot-tag">Spring Boot</span><span class="loot-tag">FastAPI</span></div>
+      </a>
+      <a href="https://github.com/kartavynirwel-code/ecommerce-microservices" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">🌳</span><span class="crate-tier charted">Charted</span></div>
+        <div class="crate-name">Terra &amp; Oak — Ecommerce Microservices</div>
+        <div class="crate-desc">Auth, product, order, cart, frontend migrated Compose → Kubernetes via a generic Helm chart.</div>
+        <div class="crate-loot"><span class="loot-tag">Helm</span><span class="loot-tag">K8s</span></div>
+      </a>
+      <a href="https://github.com/kartavynirwel-code/QuickCart-Microservices" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">🛒</span><span class="crate-tier charted">Charted</span></div>
+        <div class="crate-name">QuickCart — Microservices Commerce</div>
+        <div class="crate-desc">React + Spring Boot + FastAPI + MySQL StatefulSet. Full Jenkins pipeline, fixed OOMKilled pods &amp; CORS.</div>
+        <div class="crate-loot"><span class="loot-tag">Jenkins</span><span class="loot-tag">Docker</span></div>
+      </a>
+      <a href="https://github.com/kartavynirwel-code/Devops-plates" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">📐</span><span class="crate-tier logged">Logged</span></div>
+        <div class="crate-name">Devops-plates</div>
+        <div class="crate-desc">22+ section reference repo — Terraform modules, Nginx Ingress TLS guides, DAST notes.</div>
+        <div class="crate-loot"><span class="loot-tag">Terraform</span></div>
+      </a>
+      <a href="https://github.com/kartavynirwel-code/FoodHub" target="_blank" class="crate">
+        <div class="crate-head"><span class="crate-icon">🍔</span><span class="crate-tier logged">Logged</span></div>
+        <div class="crate-name">FoodHub</div>
+        <div class="crate-desc">Four-service microservices with Spring Cloud Gateway, JWT auth, restricted CORS.</div>
+        <div class="crate-loot"><span class="loot-tag">JWT</span><span class="loot-tag">Gateway</span></div>
+      </a>
+    </div>
+    <div style="text-align:center; margin-top:24px;"><a href="https://github.com/kartavynirwel-code" target="_blank" class="mc-btn gold">View All Repos ▸</a></div>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-contact">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <div class="modal-eyebrow mono">Lighthouse</div>
+    <h2 class="modal-title display">Send a Signal</h2>
+    <div class="modal-sub">Open to DevOps/DevSecOps internships, entry-level roles, and cloud infra collaborations.</div>
+    <div class="manifest">
+      <a href="mailto:kartavyanirwell@gmail.com" class="manifest-link"><div class="manifest-icon">✉️</div><div><div class="manifest-label">Email</div><div class="manifest-value">kartavyanirwell@gmail.com</div></div></a>
+      <a href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank" class="manifest-link"><div class="manifest-icon">💼</div><div><div class="manifest-label">LinkedIn</div><div class="manifest-value">kartavya-nirwel-0b7202326</div></div></a>
+      <a href="https://github.com/kartavynirwel-code" target="_blank" class="manifest-link"><div class="manifest-icon">🐙</div><div><div class="manifest-label">GitHub</div><div class="manifest-value">kartavynirwel-code</div></div></a>
+      <a href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" class="manifest-link"><div class="manifest-icon">📄</div><div><div class="manifest-label">Resume</div><div class="manifest-value">Download PDF</div></div></a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Scroll reveal
-const reveals = document.querySelectorAll('.reveal');
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
-}, { threshold:0.1, rootMargin:'0px 0px -60px 0px' });
-reveals.forEach(el => io.observe(el));
+  if(typeof THREE === 'undefined'){
+    document.write('<scr' + 'ipt src="https://unpkg.com/three@0.128.0/build/three.min.js"></scr' + 'ipt>');
+  }
+</script>
+<script>
+(function(){
 
-// Active hotbar highlight
-const sections = document.querySelectorAll('section[id]');
-const hotbarLinks = document.querySelectorAll('.hotbar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => { if(window.scrollY >= s.offsetTop - 140) current = s.getAttribute('id'); });
-  hotbarLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-});
+var SECTIONS = {
+  about:   { label:'Command Deck' },
+  skills:  { label:'The Forge' },
+  pipeline:{ label:'Nav Tower' },
+  certs:   { label:'Trophy Hold' },
+  projects:{ label:'The Docks' },
+  contact: { label:'Lighthouse' }
+};
 
-// Mobile inventory menu
-const navToggle = document.getElementById('navToggle');
-const mobileMenu = document.getElementById('mobileMenu');
-function closeMenu(){
-  navToggle.classList.remove('open'); mobileMenu.classList.remove('open');
-  navToggle.setAttribute('aria-expanded','false'); document.body.style.overflow='';
+function openModal(key){
+  var el = document.getElementById('modal-' + key);
+  if(el) el.classList.add('open');
 }
-navToggle.addEventListener('click', () => {
-  const isOpen = mobileMenu.classList.toggle('open');
-  navToggle.setAttribute('aria-expanded', String(isOpen));
-  document.body.style.overflow = isOpen ? 'hidden' : '';
+function closeModals(){
+  document.querySelectorAll('.modal-layer.open').forEach(function(el){ el.classList.remove('open'); });
+}
+document.querySelectorAll('[data-close]').forEach(function(el){ el.addEventListener('click', closeModals); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModals(); });
+
+var qn = document.getElementById('quicknav');
+document.getElementById('btnSections').addEventListener('click', function(){ qn.classList.add('open'); });
+document.getElementById('qnBackdrop').addEventListener('click', function(){ qn.classList.remove('open'); });
+document.querySelectorAll('.qn-item').forEach(function(btn){
+  btn.addEventListener('click', function(){ qn.classList.remove('open'); openModal(btn.getAttribute('data-open')); });
 });
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+var loader = document.getElementById('loader');
+var fallback = document.getElementById('fallback');
+var hud = document.getElementById('hud');
+
+function webglOK(){
+  try{
+    var c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+  }catch(e){ return false; }
+}
+
+if(typeof THREE === 'undefined' || !webglOK()){
+  loader.classList.add('hide');
+  fallback.classList.add('show');
+  document.getElementById('gameCanvas').style.display = 'none';
+  return;
+}
+
+/* ================= LOADER 3D (ship sailing in) ================= */
+var loaderDone = false;
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('loaderCanvas');
+  var pctEl = document.getElementById('ldPct');
+  var barFill = document.getElementById('ldBarFill');
+  var logEl = document.getElementById('ldLog');
+  var logs = ['$ terraform apply island.tf', '$ docker build -t voyage:latest .', '$ kubectl apply -f world.yaml', '$ argocd app sync island', 'Provisioning ocean... done', 'Booting explorer.exe'];
+  var li = 0;
+  var logTimer = setInterval(function(){ if(logEl){ logEl.textContent = logs[li % logs.length]; li++; } }, 650);
+
+  var renderer;
+  try{ renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true }); }
+  catch(e){ document.getElementById('ldFallback').classList.remove('ld-hidden'); }
+
+  if(renderer && !reduced){
+    document.getElementById('ldFallback').classList.add('ld-hidden');
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a1729, 0.05);
+    var camera = new THREE.PerspectiveCamera(50, canvas.clientWidth/Math.max(canvas.clientHeight,1), 0.1, 200);
+    scene.add(new THREE.AmbientLight(0x2a3f57, 1.2));
+    var moonLight = new THREE.DirectionalLight(0xf8f6ee, 1.3); moonLight.position.set(-8,12,-4); scene.add(moonLight);
+    var emeraldLight = new THREE.PointLight(0x22e0a4, 3, 30); emeraldLight.position.set(3,4,6); scene.add(emeraldLight);
+    var goldLight = new THREE.PointLight(0xe3b661, 1.6, 26); goldLight.position.set(-4,3,2); scene.add(goldLight);
+
+    var oceanGeo = new THREE.PlaneGeometry(160,160,70,70); oceanGeo.rotateX(-Math.PI/2);
+    var ocean = new THREE.Mesh(oceanGeo, new THREE.MeshStandardMaterial({ color:0x0d2438, roughness:0.35, metalness:0.35, flatShading:true }));
+    ocean.position.y = -1; scene.add(ocean);
+    var oceanPos = oceanGeo.attributes.position; var basePos = oceanPos.array.slice();
+
+    var ship = new THREE.Group();
+    var trimMat = new THREE.MeshStandardMaterial({ color:0xe3b661, roughness:0.45, metalness:0.4 });
+    var sailMat = new THREE.MeshStandardMaterial({ color:0xf3f0e6, roughness:0.9, side:THREE.DoubleSide });
+    var hull = new THREE.Mesh(new THREE.CylinderGeometry(1.7,2.5,7,6,1,false,0,Math.PI), new THREE.MeshStandardMaterial({ color:0x14283f, roughness:0.65 }));
+    hull.rotation.z = Math.PI/2; hull.rotation.y = Math.PI/2; hull.scale.set(1,0.9,1.5); ship.add(hull);
+    var mast = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,6.4,8), trimMat); mast.position.y = 3.2; ship.add(mast);
+    var sail1 = new THREE.Mesh(new THREE.PlaneGeometry(2.8,3.2), sailMat); sail1.position.set(0.9,3.6,0); sail1.rotation.y = Math.PI/2.5; ship.add(sail1);
+    var sail2 = new THREE.Mesh(new THREE.PlaneGeometry(2.1,2.3), sailMat); sail2.position.set(-0.6,5.3,0); sail2.rotation.y = Math.PI/2.7; ship.add(sail2);
+    ship.position.set(-30,0.7,-8); ship.rotation.y = 0.3; scene.add(ship);
+
+    var mistCount = 140; var mistGeo = new THREE.BufferGeometry(); var mistArr = new Float32Array(mistCount*3);
+    for(var i=0;i<mistCount;i++){ mistArr[i*3]=(Math.random()-0.5)*24-30; mistArr[i*3+1]=Math.random()*2.2; mistArr[i*3+2]=(Math.random()-0.5)*10-8; }
+    mistGeo.setAttribute('position', new THREE.BufferAttribute(mistArr,3));
+    var mist = new THREE.Points(mistGeo, new THREE.PointsMaterial({ color:0xdfe8ee, size:0.16, transparent:true, opacity:0.55 }));
+    scene.add(mist);
+
+    function resize(){ var w=canvas.clientWidth||window.innerWidth, h=canvas.clientHeight||window.innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize();
+    window.addEventListener('resize', resize);
+
+    var clock = new THREE.Clock(); var raf;
+    function animate(){
+      raf = requestAnimationFrame(animate);
+      var t = clock.getElapsedTime();
+      var arr = oceanPos.array;
+      for(var i=0;i<arr.length;i+=3){ var x=basePos[i], z=basePos[i+2]; arr[i+1]=Math.sin(x*0.18+t*1.1)*0.55+Math.cos(z*0.22+t*0.8)*0.4; }
+      oceanPos.needsUpdate = true; oceanGeo.computeVertexNormals();
+      var shipT = Math.min(1, t/3.6);
+      ship.position.x = -30 + shipT*64; ship.position.y = 0.7 + Math.sin(t*2)*0.2; ship.rotation.z = Math.sin(t*1.6)*0.05;
+      camera.position.set(ship.position.x*0.32-3, 4.6, 15-shipT*3);
+      camera.lookAt(ship.position.x*0.55, 1.6, -3);
+      mist.rotation.y = t*0.015; goldLight.intensity = 1.4+Math.sin(t*3)*0.3;
+      renderer.render(scene, camera);
+    }
+    animate();
+    window.__ldCleanup = function(){ cancelAnimationFrame(raf); window.removeEventListener('resize', resize); renderer.dispose(); };
+  }
+
+  var duration = 4200; var start = performance.now(); var finished = false;
+  function tick(now){
+    var t = Math.min(1,(now-start)/duration); var val = Math.round(t*100);
+    if(pctEl) pctEl.textContent = val+'%'; if(barFill) barFill.style.width = val+'%';
+    if(t<1 && !finished){ requestAnimationFrame(tick); } else if(!finished){ finish(); }
+  }
+  requestAnimationFrame(tick);
+  function finish(){
+    if(finished) return; finished = true; clearInterval(logTimer);
+    loader.classList.add('wipe');
+    setTimeout(function(){
+      loader.classList.add('hide');
+      if(window.__ldCleanup) window.__ldCleanup();
+      loaderDone = true;
+      hud.classList.add('on');
+      startHintFade();
+    }, 820);
+  }
+  loader.addEventListener('click', finish);
+})();
+
+function startHintFade(){
+  setTimeout(function(){ document.getElementById('hudHint').classList.add('fade'); }, 6500);
+}
+
+/* ================= MAIN 3D WORLD ================= */
+var canvas = document.getElementById('gameCanvas');
+var renderer;
+try{ renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true }); }
+catch(e){ fallback.classList.add('show'); canvas.style.display='none'; return; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+
+var scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a1729, 0.028);
+var camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 400);
+
+scene.add(new THREE.AmbientLight(0x33465f, 1.15));
+var sun = new THREE.DirectionalLight(0xf8f6ee, 1.15); sun.position.set(-20,30,-10); scene.add(sun);
+var fillLight = new THREE.HemisphereLight(0x9fd8ff, 0x11202f, 0.5); scene.add(fillLight);
+
+/* moon */
+var moon = new THREE.Mesh(new THREE.SphereGeometry(6,20,20), new THREE.MeshBasicMaterial({ color:0xf7f5ee }));
+moon.position.set(-60,50,-90); scene.add(moon);
+
+/* ocean */
+var oceanGeo2 = new THREE.PlaneGeometry(400,400,90,90); oceanGeo2.rotateX(-Math.PI/2);
+var ocean2 = new THREE.Mesh(oceanGeo2, new THREE.MeshStandardMaterial({ color:0x0c2032, roughness:0.4, metalness:0.3, flatShading:true }));
+ocean2.position.y = -0.6; scene.add(ocean2);
+var oceanPos2 = oceanGeo2.attributes.position; var basePos2 = oceanPos2.array.slice();
+
+/* island platform */
+var ISLAND_R = 34;
+var island = new THREE.Mesh(new THREE.CylinderGeometry(ISLAND_R, ISLAND_R+2, 2, 48), new THREE.MeshStandardMaterial({ color:0x16283f, roughness:0.85, flatShading:true }));
+island.position.y = 0; scene.add(island);
+var deckTop = new THREE.Mesh(new THREE.CylinderGeometry(ISLAND_R-0.4, ISLAND_R-0.4, 0.3, 48), new THREE.MeshStandardMaterial({ color:0x1c3350, roughness:0.7 }));
+deckTop.position.y = 1.15; scene.add(deckTop);
+/* deck ring accent */
+var ring = new THREE.Mesh(new THREE.TorusGeometry(ISLAND_R-0.6, 0.12, 8, 64), new THREE.MeshStandardMaterial({ color:0x22e0a4, emissive:0x0d5c41, roughness:0.4 }));
+ring.rotation.x = Math.PI/2; ring.position.y = 1.32; scene.add(ring);
+/* rail posts */
+for(var rp=0; rp<28; rp++){
+  var ang = (rp/28)*Math.PI*2;
+  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,1.1,6), new THREE.MeshStandardMaterial({ color:0xe3b661, roughness:0.5 }));
+  post.position.set(Math.cos(ang)*(ISLAND_R-0.2), 1.8, Math.sin(ang)*(ISLAND_R-0.2));
+  scene.add(post);
+}
+
+/* clouds */
+function makeCloud(x,y,z,scale){
+  var g = new THREE.Group();
+  for(var k=0;k<4;k++){
+    var m = new THREE.Mesh(new THREE.SphereGeometry(1.4+Math.random()*0.8, 8, 8), new THREE.MeshStandardMaterial({ color:0xf3f0e6, transparent:true, opacity:0.5, roughness:1 }));
+    m.position.set((Math.random()-0.5)*3, (Math.random()-0.5)*0.6, (Math.random()-0.5)*1.4);
+    g.add(m);
+  }
+  g.position.set(x,y,z); g.scale.setScalar(scale);
+  scene.add(g); return g;
+}
+var clouds = [makeCloud(-40,26,-50,3), makeCloud(50,30,-60,4), makeCloud(0,34,-80,5), makeCloud(70,24,20,3.4)];
+
+/* ================= STATIONS ================= */
+var STATION_R = 22;
+var stationDefs = [
+  { key:'about', label:'Command Deck', icon:'🧑‍✈️', angle:0, color:0xe3b661 },
+  { key:'skills', label:'The Forge', icon:'⚒️', angle:60, color:0x22e0a4 },
+  { key:'pipeline', label:'Nav Tower', icon:'📡', angle:120, color:0x3d8fc0 },
+  { key:'certs', label:'Trophy Hold', icon:'🏆', angle:180, color:0xe3b661 },
+  { key:'projects', label:'The Docks', icon:'📦', angle:240, color:0x22e0a4 },
+  { key:'contact', label:'Lighthouse', icon:'🗼', angle:300, color:0xf8f6ee }
+];
+
+function makeIconSprite(icon){
+  var c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  var ctx = c.getContext('2d');
+  ctx.font = '84px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(icon, 64, 70);
+  var tex = new THREE.CanvasTexture(c);
+  var mat = new THREE.SpriteMaterial({ map:tex, transparent:true });
+  var sp = new THREE.Sprite(mat); sp.scale.set(2.2,2.2,1);
+  return sp;
+}
+
+var stations = [];
+stationDefs.forEach(function(def){
+  var rad = def.angle * Math.PI/180;
+  var x = Math.cos(rad)*STATION_R, z = Math.sin(rad)*STATION_R;
+  var g = new THREE.Group(); g.position.set(x, 1.3, z);
+
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.3,0.4,10), new THREE.MeshStandardMaterial({ color:0x0c1826, roughness:0.6 }));
+  g.add(base);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,3.4,8), new THREE.MeshStandardMaterial({ color:def.color, roughness:0.4, metalness:0.3 }));
+  pole.position.y = 1.9; g.add(pole);
+  var orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5,0), new THREE.MeshStandardMaterial({ color:def.color, emissive:def.color, emissiveIntensity:0.6, roughness:0.3 }));
+  orb.position.y = 3.7; g.add(orb);
+  var light = new THREE.PointLight(def.color, 1.6, 10); light.position.y = 3.7; g.add(light);
+  var icon = makeIconSprite(def.icon); icon.position.y = 5.1; g.add(icon);
+
+  scene.add(g);
+  stations.push({ def:def, group:g, orb:orb, pos:new THREE.Vector3(x,0,z) });
+});
+
+/* ================= CHARACTER ================= */
+var player = new THREE.Group();
+var suitMat = new THREE.MeshStandardMaterial({ color:0x14283f, roughness:0.6 });
+var trimMat2 = new THREE.MeshStandardMaterial({ color:0xe3b661, roughness:0.4, metalness:0.4 });
+var visorMat = new THREE.MeshStandardMaterial({ color:0x22e0a4, emissive:0x0f7a58, emissiveIntensity:0.5, roughness:0.3 });
+
+var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.5,1.15,10), suitMat); torso.position.y = 1.05; player.add(torso);
+var belt = new THREE.Mesh(new THREE.TorusGeometry(0.47,0.06,8,16), trimMat2); belt.rotation.x = Math.PI/2; belt.position.y = 0.62; player.add(belt);
+var head = new THREE.Mesh(new THREE.SphereGeometry(0.36,14,12), suitMat); head.position.y = 1.85; player.add(head);
+var visor = new THREE.Mesh(new THREE.SphereGeometry(0.2,12,10), visorMat); visor.position.set(0,1.85,0.28); visor.scale.set(1,0.7,0.6); player.add(visor);
+var pack = new THREE.Mesh(new THREE.BoxGeometry(0.32,0.55,0.22), trimMat2); pack.position.set(0,1.1,-0.36); player.add(pack);
+var legL = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.55,8), suitMat); legL.position.set(-0.18,0.28,0); player.add(legL);
+var legR = legL.clone(); legR.position.x = 0.18; player.add(legR);
+
+player.position.set(0, 0, 10);
+scene.add(player);
+
+/* ================= INPUT ================= */
+var keys = {};
+window.addEventListener('keydown', function(e){
+  keys[e.key.toLowerCase()] = true;
+  if(e.key === 'Enter' || e.key === ' '){ tryInteract(); }
+});
+window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
+
+var joyVec = { x:0, y:0 };
+(function(){
+  var stick = document.getElementById('joystick');
+  var nub = document.getElementById('joyNub');
+  var active = false, cx=0, cy=0, id=null;
+  function start(e){
+    active = true; stick.classList.add('active-input');
+    var r = stick.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2;
+    id = e.pointerId; move(e);
+  }
+  function move(e){
+    if(!active || e.pointerId !== id) return;
+    var dx = e.clientX - cx, dy = e.clientY - cy;
+    var dist = Math.min(38, Math.hypot(dx,dy));
+    var ang = Math.atan2(dy,dx);
+    var nx = Math.cos(ang)*dist, ny = Math.sin(ang)*dist;
+    nub.style.transform = 'translate(' + nx + 'px,' + ny + 'px)';
+    joyVec.x = nx/38; joyVec.y = ny/38;
+  }
+  function end(e){
+    if(e.pointerId !== id) return;
+    active = false; id = null; nub.style.transform = 'translate(0,0)'; joyVec.x = 0; joyVec.y = 0;
+  }
+  stick.addEventListener('pointerdown', start);
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
+})();
+
+/* camera orbit drag (on canvas only) */
+var camAngle = Math.PI; var camDist = 11; var camHeight = 6.5;
+(function(){
+  var dragging = false, lastX = 0, dragId = null;
+  canvas.addEventListener('pointerdown', function(e){ dragging = true; lastX = e.clientX; dragId = e.pointerId; });
+  window.addEventListener('pointermove', function(e){
+    if(!dragging || e.pointerId !== dragId) return;
+    var dx = e.clientX - lastX; lastX = e.clientX;
+    camAngle -= dx * 0.006;
+  });
+  window.addEventListener('pointerup', function(e){ if(e.pointerId === dragId) dragging = false; });
+})();
+
+/* ================= INTERACTION ================= */
+var promptEl = document.getElementById('prompt');
+var promptLabel = document.getElementById('promptLabel');
+var activeStation = null;
+var tmpV = new THREE.Vector3();
+
+function tryInteract(){
+  if(activeStation) openModal(activeStation.def.key);
+}
+promptEl.addEventListener('click', tryInteract);
+
+function updatePrompt(){
+  var closest = null, closestDist = 7.5;
+  stations.forEach(function(s){
+    var d = Math.hypot(player.position.x - s.pos.x, player.position.z - s.pos.z);
+    if(d < closestDist){ closestDist = d; closest = s; }
+  });
+  activeStation = closest;
+  if(closest){
+    tmpV.set(closest.pos.x, 5.6, closest.pos.z);
+    tmpV.project(camera);
+    if(tmpV.z < 1){
+      var sx = (tmpV.x * 0.5 + 0.5) * window.innerWidth;
+      var sy = (-tmpV.y * 0.5 + 0.5) * window.innerHeight;
+      promptEl.style.left = sx + 'px'; promptEl.style.top = sy + 'px';
+      promptEl.classList.add('show');
+      promptLabel.textContent = 'Open ' + closest.def.label;
+    } else { promptEl.classList.remove('show'); }
+  } else {
+    promptEl.classList.remove('show');
+  }
+}
+
+/* ================= RESIZE ================= */
+function onResize(){
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+/* ================= LOOP ================= */
+var clock2 = new THREE.Clock();
+var facing = 0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  var dt = Math.min(0.05, clock2.getDelta());
+  var t = clock2.elapsedTime;
+
+  /* ocean waves */
+  var arr2 = oceanPos2.array;
+  for(var i=0;i<arr2.length;i+=3){
+    var x=basePos2[i], z=basePos2[i+2];
+    arr2[i+1] = Math.sin(x*0.06+t*0.7)*0.7 + Math.cos(z*0.08+t*0.5)*0.5;
+  }
+  oceanPos2.needsUpdate = true;
+  if(Math.floor(t*10)%2===0) oceanGeo2.computeVertexNormals();
+
+  /* input vector */
+  var mx = 0, mz = 0;
+  if(keys['w']||keys['arrowup']) mz -= 1;
+  if(keys['s']||keys['arrowdown']) mz += 1;
+  if(keys['a']||keys['arrowleft']) mx -= 1;
+  if(keys['d']||keys['arrowright']) mx += 1;
+  mx += joyVec.x; mz += joyVec.y;
+  var len = Math.hypot(mx,mz);
+  if(len > 0.05){
+    mx/=Math.max(len,1); mz/=Math.max(len,1);
+    var speed = 8.5;
+    player.position.x += mx*speed*dt;
+    player.position.z += mz*speed*dt;
+    var distFromCenter = Math.hypot(player.position.x, player.position.z);
+    if(distFromCenter > ISLAND_R-2){
+      var k = (ISLAND_R-2)/distFromCenter;
+      player.position.x *= k; player.position.z *= k;
+    }
+    var targetFacing = Math.atan2(mx, mz);
+    var diff = targetFacing - facing;
+    while(diff > Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+    facing += diff * Math.min(1, dt*10);
+    player.rotation.y = facing;
+    player.position.y = Math.abs(Math.sin(t*9))*0.05;
+  }
+
+  /* station idle animation */
+  stations.forEach(function(s){ s.orb.rotation.y += dt*0.6; s.orb.position.y = 3.7 + Math.sin(t*2 + s.pos.x)*0.12; });
+  clouds.forEach(function(c,ci){ c.position.x += dt*(0.3+ci*0.05); if(c.position.x > 120) c.position.x = -120; });
+
+  /* camera */
+  var offset = new THREE.Vector3(Math.sin(camAngle)*camDist, camHeight, Math.cos(camAngle)*camDist);
+  var desired = new THREE.Vector3(player.position.x, player.position.y, player.position.z).add(offset);
+  camera.position.lerp(desired, 1 - Math.pow(0.001, dt));
+  camera.lookAt(player.position.x, player.position.y + 1.3, player.position.z);
+
+  if(loaderDone) updatePrompt();
+
+  renderer.render(scene, camera);
+}
+animate();
+
+})();
 </script>
 </body>
 </html>
