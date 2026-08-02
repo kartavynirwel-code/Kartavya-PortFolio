@@ -87,11 +87,11 @@ button{font-family:inherit; border:none; background:none; color:inherit; cursor:
 .prompt-key{ width:30px; height:30px; border-radius:50%; background:rgba(34,224,164,0.15); border:1.5px solid var(--emerald); color:var(--emerald-soft); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:12px; animation:prompt-pulse 1.4s ease-in-out infinite; }
 @keyframes prompt-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(34,224,164,0.5);} 50%{ box-shadow:0 0 0 8px rgba(34,224,164,0);} }
 
-/* joystick */
-.joystick{ position:absolute; left:26px; bottom:26px; width:118px; height:118px; border-radius:50%; background:rgba(15,28,46,0.55); border:1.5px solid var(--panel-line); pointer-events:auto; display:none; touch-action:none; box-shadow:inset 0 0 0 1px rgba(227,182,97,0.08), 0 4px 18px rgba(0,0,0,0.35); }
-.joystick.active-input{ display:block; }
+/* joystick — spawns wherever the person touches, not pinned to one corner */
+.joystick{ position:fixed; left:0; top:0; width:112px; height:112px; border-radius:50%; background:rgba(15,28,46,0.55); border:1.5px solid var(--panel-line); pointer-events:none; display:none; touch-action:none; transform:translate(-50%,-50%); box-shadow:inset 0 0 0 1px rgba(227,182,97,0.08), 0 4px 18px rgba(0,0,0,0.35); z-index:25; }
+.joystick.show{ display:block; }
 .joystick.dragging{ border-color:var(--emerald); }
-.joy-nub{ position:absolute; width:50px; height:50px; border-radius:50%; left:34px; top:34px; background:radial-gradient(circle at 35% 30%, var(--emerald-soft), var(--emerald-dim)); box-shadow:0 4px 10px rgba(0,0,0,0.4); touch-action:none; transition:transform .04s linear; will-change:transform; }
+.joy-nub{ position:absolute; width:48px; height:48px; border-radius:50%; left:32px; top:32px; background:radial-gradient(circle at 35% 30%, var(--emerald-soft), var(--emerald-dim)); box-shadow:0 4px 10px rgba(0,0,0,0.4); touch-action:none; transition:transform .04s linear; will-change:transform; }
 .cam-hint{ position:absolute; right:24px; bottom:26px; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim2); letter-spacing:1px; text-align:right; pointer-events:none; opacity:0.7; }
 #gameCanvas{ image-rendering:pixelated; image-rendering:crisp-edges; }
 .scanlines{ position:fixed; inset:0; z-index:15; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.10) 2px, rgba(0,0,0,0.10) 3px); mix-blend-mode:multiply; opacity:0.55; }
@@ -205,7 +205,7 @@ button{font-family:inherit; border:none; background:none; color:inherit; cursor:
   .hud-btn span.hb-txt{ display:none; }
   .cam-hint{ display:none; }
 }
-@media (pointer:coarse){ .joystick{ display:block; } }
+
 @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; } }
 </style>
 </head>
@@ -290,10 +290,10 @@ button{font-family:inherit; border:none; background:none; color:inherit; cursor:
     </div>
   </div>
 
-  <div class="hud-hint mono" id="hudHint">WASD / arrows or the pad to walk · walk up to a terminal to open it</div>
+  <div class="hud-hint mono" id="hudHint">WASD / arrows or swipe anywhere to walk · reach a terminal and tap to open it</div>
 
   <div class="joystick" id="joystick"><div class="joy-nub" id="joyNub"></div></div>
-  <div class="cam-hint mono">ARROW KEYS<br>OR PAD ▸ MOVE</div>
+  <div class="cam-hint mono">ARROW KEYS<br>OR SWIPE ▸ MOVE</div>
 
   <div class="prompt" id="prompt">
     <div class="prompt-key">↵</div>
@@ -627,22 +627,28 @@ var joyVec = { x:0, y:0 };
 (function(){
   var stick = document.getElementById('joystick');
   var nub = document.getElementById('joyNub');
-  var active = false, cx=0, cy=0, id=null, maxR=34;
+  var active = false, cx=0, cy=0, id=null;
+  var maxR = 48; // matches the joystick's CSS radius, minus inner padding
+  var startTime = 0, moved = false;
+  var MOVE_THRESHOLD = 10; // px of movement before a touch counts as a drag, not a tap
 
   function setNub(nx, ny){ nub.style.transform = 'translate(' + nx.toFixed(1) + 'px,' + ny.toFixed(1) + 'px)'; }
+
   function start(e){
+    if(e.pointerType !== 'touch') return; // keyboard still drives desktop/mouse
+    active = true; id = e.pointerId; moved = false;
+    startTime = performance.now();
+    cx = e.clientX; cy = e.clientY;
+    stick.style.left = cx + 'px'; stick.style.top = cy + 'px';
+    stick.classList.add('show','dragging');
+    setNub(0,0);
+    try{ canvas.setPointerCapture(id); }catch(err){}
     e.preventDefault();
-    active = true; id = e.pointerId;
-    stick.classList.add('active-input','dragging');
-    var r = stick.getBoundingClientRect();
-    cx = r.left + r.width/2; cy = r.top + r.height/2;
-    maxR = r.width/2 - 8;
-    try{ stick.setPointerCapture(id); }catch(err){}
-    update(e.clientX, e.clientY);
   }
   function update(clientX, clientY){
     var dx = clientX - cx, dy = clientY - cy;
     var dist = Math.hypot(dx,dy);
+    if(dist > MOVE_THRESHOLD) moved = true;
     var clamped = Math.min(maxR, dist);
     var ang = Math.atan2(dy,dx);
     var nx = Math.cos(ang)*clamped, ny = Math.sin(ang)*clamped;
@@ -650,20 +656,25 @@ var joyVec = { x:0, y:0 };
     if(clamped < 6){ joyVec.x = 0; joyVec.y = 0; return; }
     joyVec.x = nx/maxR; joyVec.y = ny/maxR;
   }
-  function move(e){ if(!active || e.pointerId !== id) return; e.preventDefault(); update(e.clientX, e.clientY); }
+  function move(e){
+    if(!active || e.pointerId !== id) return;
+    e.preventDefault();
+    update(e.clientX, e.clientY);
+  }
   function end(e){
     if(e.pointerId !== id) return;
     active = false; id = null;
-    stick.classList.remove('dragging');
+    stick.classList.remove('dragging','show');
     setNub(0,0); joyVec.x = 0; joyVec.y = 0;
-    try{ stick.releasePointerCapture(e.pointerId); }catch(err){}
+    try{ canvas.releasePointerCapture(e.pointerId); }catch(err){}
+    var heldFor = performance.now() - startTime;
+    if(!moved && heldFor < 400){ tryInteract(); } // quick tap near a station opens it
   }
-  stick.addEventListener('pointerdown', start, { passive:false });
-  stick.addEventListener('pointermove', move, { passive:false });
-  stick.addEventListener('pointerup', end);
-  stick.addEventListener('pointercancel', end);
-  stick.addEventListener('lostpointercapture', function(e){ if(e.pointerId === id) end(e); });
-  if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches){ stick.classList.add('active-input'); }
+  canvas.addEventListener('pointerdown', start, { passive:false });
+  canvas.addEventListener('pointermove', move, { passive:false });
+  canvas.addEventListener('pointerup', end);
+  canvas.addEventListener('pointercancel', end);
+  canvas.addEventListener('lostpointercapture', function(e){ if(e.pointerId === id) end(e); });
 })();
 
 /* ================= INTERACTION ================= */
