@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kartavya Nirwel — DevOps &amp; DevSecOps Engineer</title>
+<meta name="description" content="Kartavya Nirwel: DevOps intern and final-year CS student building secure CI/CD, Kubernetes and AWS delivery pipelines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --ink:#0f1a2b; --dim:#52607a; --line:#d6dce5;
+  --accent:#0b6b66; --accent-soft:#dcefed; --warn:#a85a00; --warn-soft:#fbead2;
+  --term:#0f1a2b; --term-ink:#d7e1ee; --term-ok:#5fe3b0; --term-warn:#f5b45a;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c141f; --surface:#121d2b; --ink:#e6edf6; --dim:#97a6bb; --line:#223246;
+    --accent:#4fd1c5; --accent-soft:#123a3a; --warn:#f0a94d; --warn-soft:#3a2a12;
+    --term:#070d15; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c141f; --surface:#121d2b; --ink:#e6edf6; --dim:#97a6bb; --line:#223246;
+  --accent:#4fd1c5; --accent-soft:#123a3a; --warn:#f0a94d; --warn-soft:#3a2a12;
+  --term:#070d15; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.65 'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Bricolage Grotesque','IBM Plex Sans',sans-serif;line-height:1.1;letter-spacing:-.02em}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+/* nav */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.brand{font:700 18px 'Bricolage Grotesque',sans-serif;text-decoration:none;letter-spacing:-.01em}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav a{font-size:14px;color:var(--dim);text-decoration:none;padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav a:hover{color:var(--ink);background:var(--accent-soft)}
+.btn{display:inline-block;font-weight:600;font-size:15px;padding:11px 20px;border-radius:8px;text-decoration:none;border:1px solid var(--ink);transition:transform .15s}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn:hover{transform:translateY(-2px)}
+
+/* hero */
+.hero{padding:72px 0 64px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(40px,6.2vw,70px);font-weight:800}
+.hero .role{margin:18px 0 14px;font-size:19px;font-weight:500;color:var(--accent)}
+.hero p.lead{color:var(--dim);max-width:520px;font-size:17px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.facts{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px;color:var(--dim);font-size:14px}
+.facts b{color:var(--ink);font-weight:600}
+
+/* pipeline terminal */
+.run{background:var(--term);color:var(--term-ink);border-radius:12px;padding:18px 20px 20px;font:400 13px/1.9 'IBM Plex Mono',monospace;box-shadow:0 18px 40px -22px rgba(10,20,40,.6)}
+.run-h{display:flex;justify-content:space-between;color:#8a9bb3;border-bottom:1px solid #243349;padding-bottom:10px;margin-bottom:10px;font-size:12px}
+.st{display:flex;gap:10px;align-items:baseline;opacity:0}
+.st i{font-style:normal;width:14px;color:var(--term-ok)}
+.st em{font-style:normal;margin-left:auto;color:#7f90a9;font-size:12px}
+.st.warn i{color:var(--term-warn)}
+.st.warn{color:var(--term-warn)}
+.run-f{margin-top:12px;padding-top:10px;border-top:1px solid #243349;color:var(--term-ok);opacity:0}
+.go .st,.go .run-f{animation:in .35s forwards;animation-delay:calc(var(--n)*.28s + .3s)}
+@keyframes in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.st,.run-f{opacity:1!important;animation:none!important}html{scroll-behavior:auto}}
+
+/* sections */
+section{padding:72px 0;border-top:1px solid var(--line)}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+.sh h2{font-size:clamp(28px,4vw,40px);font-weight:700}
+.sh p{color:var(--dim);max-width:420px;font-size:15px}
+
+.job{display:grid;grid-template-columns:200px 1fr;gap:28px;padding:26px 0;border-bottom:1px solid var(--line)}
+.job:first-of-type{padding-top:0}
+.job .when{color:var(--dim);font-size:14px}
+.job h3{font-size:22px;margin-bottom:2px}
+.job .org{color:var(--accent);font-weight:500;margin-bottom:8px}
+.job p{color:var(--dim);max-width:640px}
+
+/* projects */
+.proj{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px;text-decoration:none;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.card.big{grid-column:span 2;border-left:4px solid var(--accent)}
+.card h3{font-size:21px}
+.card p{color:var(--dim);font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.tag{font:500 12px 'IBM Plex Mono',monospace;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.badge{font-size:12px;font-weight:600;color:var(--accent)}
+.more{margin-top:26px;color:var(--dim);font-size:15px}
+.more a{color:var(--accent);font-weight:600}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px}
+.skills h3{font-size:17px;margin-bottom:10px}
+.skills ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skills li{font-size:14px;padding:4px 11px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+
+/* pipeline detail */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.flow div{padding:16px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.flow div:nth-child(4n){border-right:0}
+.flow div:nth-last-child(-n+1){border-bottom:0}
+.flow b{display:block;font-size:15px}
+.flow span{color:var(--dim);font-size:13px}
+.flow .p{background:var(--warn-soft)}
+.flow .p b{color:var(--warn)}
+.note{margin-top:14px;color:var(--dim);font-size:14px}
+
+/* certs */
+.certs{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cert{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+.cert b{display:block;font-size:16px;margin-bottom:2px}
+.cert span{color:var(--dim);font-size:14px}
+
+/* contact */
+.contact{text-align:left}
+.contact h2{font-size:clamp(32px,5vw,54px);font-weight:800;max-width:700px}
+.contact p{color:var(--dim);margin:16px 0 28px;max-width:520px;font-size:17px}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+footer{padding:26px 0 40px;color:var(--dim);font-size:13px;border-top:1px solid var(--line)}
+
+@media (max-width:820px){
+  .hero{padding-top:44px}
+  .hero .wrap{grid-template-columns:1fr;gap:36px}
+  .job{grid-template-columns:1fr;gap:6px}
+  .proj,.certs,.skills{grid-template-columns:1fr}
+  .card.big{grid-column:auto}
+  .flow{grid-template-columns:repeat(2,1fr)}
+  .flow div:nth-child(4n){border-right:1px solid var(--line)}
+  .flow div:nth-child(2n){border-right:0}
+  nav a:nth-child(n+5){display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top">Kartavya Nirwel</a>
+    <nav aria-label="Sections">
+      <a href="#experience">Experience</a><a href="#projects">Projects</a><a href="#pipeline">Pipeline</a><a href="#skills">Skills</a><a href="#certs">Certifications</a><a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1>I build the path from commit to production.</h1>
+      <div class="role">DevOps &amp; DevSecOps engineer · Intern at DigiValet</div>
+      <p class="lead">Final-year CS student who started as a Java and Spring Boot developer and now focuses on everything after the code is written: build it, scan it, ship it, watch it.</p>
+      <div class="cta">
+        <a class="btn pri" href="#projects">See my projects</a>
+        <a class="btn" href="https://drive.google.com/file/d/1Sevq2nD6dBXq11Md0w62XijX0rudaJO6/view?usp=sharing" target="_blank" rel="noopener">Download résumé</a>
+      </div>
+      <div class="facts">
+        <span><b>AWS</b> Solutions Architect Associate</span>
+        <span><b>B.Tech CSE</b> 2023–2027, Indore</span>
+      </div>
+    </div>
+    <div class="run" id="run" aria-label="Example pipeline run">
+      <div class="run-h"><span>pipeline: devhub-2.0</span><span>main</span></div>
+      <div class="st" style="--n:0"><i>✓</i>Commit<em>GitHub</em></div>
+      <div class="st" style="--n:1"><i>✓</i>Build<em>Jenkins</em></div>
+      <div class="st" style="--n:2"><i>✓</i>SAST<em>SonarQube gate</em></div>
+      <div class="st" style="--n:3"><i>✓</i>SCA<em>Dependency-Check</em></div>
+      <div class="st" style="--n:4"><i>✓</i>Image scan<em>Trivy</em></div>
+      <div class="st" style="--n:5"><i>✓</i>Deploy<em>ArgoCD sync</em></div>
+      <div class="st" style="--n:6"><i>✓</i>Observe<em>Prometheus · Grafana</em></div>
+      <div class="st warn" style="--n:7"><i>…</i>DAST<em>OWASP ZAP, in progress</em></div>
+      <div class="run-f" style="--n:8">Deployed and healthy</div>
+    </div>
+  </div>
+</div>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="sh"><h2>Experience and education</h2></div>
+    <div class="job">
+      <div class="when">Current</div>
+      <div>
+        <h3>DevOps Engineer Intern</h3>
+        <div class="org">DigiValet</div>
+        <p>Working in a product-company environment on CI/CD pipelines, containerization, cloud infrastructure and automation, building on my Java, Spring Boot and Kubernetes foundations.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2023 – 2027</div>
+      <div>
+        <h3>B.Tech, Computer Science</h3>
+        <div class="org">Acropolis Institute of Technology &amp; Research, Indore</div>
+        <p>Final year. Looking for DevOps and DevSecOps roles. Also served as Social Media Director of the college Rotaract Club, whose team won Rotary’s Best Social Media Award.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="sh"><h2>Projects</h2><p>Real pipelines and clusters, with the failures I debugged along the way.</p></div>
+    <div class="proj">
+      <a class="card big" href="https://github.com/kartavynirwel-code/DevHub-2.0" target="_blank" rel="noopener">
+        <span class="badge">Flagship</span>
+        <h3>DevHub 2.0: full DevSecOps pipeline</h3>
+        <p>React, Spring Boot and MySQL running on K3s on EC2. A Jenkins to ArgoCD GitOps pipeline where SonarQube, OWASP Dependency-Check and Trivy all gate the release before it syncs to the cluster.</p>
+        <div class="tags"><span class="tag">Jenkins</span><span class="tag">ArgoCD</span><span class="tag">SonarQube</span><span class="tag">Trivy</span><span class="tag">K3s</span></div>
+      </a>
+      <a class="card" href="https://github.com/kartavynirwel-code/StatusPulse" target="_blank" rel="noopener">
+        <span class="badge">Flagship</span>
+        <h3>StatusPulse</h3>
+        <p>Uptime and incident monitoring: a Spring Boot monitor service, a FastAPI alert service and a React frontend, all on hand-written Kubernetes manifests.</p>
+        <div class="tags"><span class="tag">Spring Boot</span><span class="tag">FastAPI</span><span class="tag">Kubernetes</span></div>
+      </a>
+      <a class="card" href="https://github.com/kartavynirwel-code/ecommerce-microservices" target="_blank" rel="noopener">
+        <h3>Terra &amp; Oak</h3>
+        <p>Ecommerce microservices (auth, product, order, cart, frontend) migrated from Docker Compose to Kubernetes with a generic Helm chart.</p>
+        <div class="tags"><span class="tag">Helm</span><span class="tag">Kubernetes</span><span class="tag">MySQL</span></div>
+      </a>
+      <a class="card" href="https://github.com/kartavynirwel-code/QuickCart-Microservices" target="_blank" rel="noopener">
+        <h3>QuickCart</h3>
+        <p>React, Spring Boot and FastAPI with a MySQL StatefulSet and a full Jenkins pipeline. Fixed OOMKilled pods and CORS issues along the way.</p>
+        <div class="tags"><span class="tag">Jenkins</span><span class="tag">Docker</span><span class="tag">FastAPI</span></div>
+      </a>
+      <a class="card" href="https://github.com/kartavynirwel-code/Devops-plates" target="_blank" rel="noopener">
+        <h3>Devops-plates</h3>
+        <p>A 22+ section reference repo with Terraform modules, Nginx Ingress TLS guides and DAST notes.</p>
+        <div class="tags"><span class="tag">Terraform</span><span class="tag">Ingress</span></div>
+      </a>
+    </div>
+    <p class="more">Also built FoodHub, a four-service app with Spring Cloud Gateway and JWT auth. <a href="https://github.com/kartavynirwel-code" target="_blank" rel="noopener">View all repositories</a></p>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="wrap">
+    <div class="sh"><h2>How I ship</h2><p>Every commit goes through this route before it reaches the cluster.</p></div>
+    <div class="flow">
+      <div><b>Commit</b><span>Git, GitHub</span></div>
+      <div><b>Build</b><span>Jenkins</span></div>
+      <div><b>SAST</b><span>SonarQube quality gate</span></div>
+      <div><b>SCA</b><span>OWASP Dependency-Check</span></div>
+      <div><b>Image scan</b><span>Trivy</span></div>
+      <div><b>Push</b><span>Docker registry</span></div>
+      <div><b>Sync</b><span>ArgoCD GitOps</span></div>
+      <div class="p"><b>DAST</b><span>OWASP ZAP, fixing a jenkins-user permissions bug</span></div>
+    </div>
+    <p class="note">Observability on top: Prometheus, Grafana, Loki and Tempo.</p>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="sh"><h2>Skills</h2></div>
+    <div class="skills">
+      <div><h3>CI/CD and GitOps</h3><ul><li>Jenkins</li><li>ArgoCD</li><li>App-of-Apps</li><li>Webhooks</li></ul></div>
+      <div><h3>Containers and orchestration</h3><ul><li>Docker</li><li>Kubernetes</li><li>Helm</li><li>K3s</li><li>EKS</li><li>MetalLB</li></ul></div>
+      <div><h3>DevSecOps</h3><ul><li>SonarQube</li><li>Dependency-Check</li><li>Trivy</li><li>OWASP ZAP</li><li>Gitleaks</li><li>Checkov</li><li>Vault</li></ul></div>
+      <div><h3>Cloud and IaC</h3><ul><li>Terraform</li><li>EC2</li><li>VPC</li><li>S3</li><li>RDS</li><li>IAM / IRSA</li></ul></div>
+      <div><h3>Observability</h3><ul><li>Prometheus</li><li>Grafana</li><li>Loki</li><li>Tempo</li><li>PromQL</li></ul></div>
+      <div><h3>Languages and backend</h3><ul><li>Java 21</li><li>Spring Boot</li><li>Spring AI</li><li>Python</li><li>FastAPI</li><li>Bash</li><li>MySQL</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="certs">
+  <div class="wrap">
+    <div class="sh"><h2>Certifications</h2></div>
+    <div class="certs">
+      <div class="cert"><b>AWS Certified Solutions Architect – Associate</b><span>Amazon Web Services</span></div>
+      <div class="cert"><b>AWS Certified Cloud Practitioner</b><span>Amazon Web Services</span></div>
+      <div class="cert"><b>HotWax Certified Associate – DevOps</b><span>HotWax Commerce · completed all three workshop levels</span></div>
+      <div class="cert"><b>Programming in Java, Elite + Gold</b><span>NPTEL, IIT Kharagpur · 2026</span></div>
+      <div class="cert"><b>Spring Boot Essentials</b><span>Infosys Springboard</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap contact">
+    <h2>Looking for a DevOps or DevSecOps fresher? Let’s talk.</h2>
+    <p>Open to internships, entry-level roles and cloud infrastructure collaborations.</p>
+    <div class="links">
+      <a class="btn pri" href="mailto:kartavyanirwell@gmail.com">kartavyanirwell@gmail.com</a>
+      <a class="btn" href="https://www.linkedin.com/in/kartavya-nirwel-0b7202326/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn" href="https://github.com/kartavynirwel-code" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">© 2026 Kartavya Nirwel · Indore, India</div></footer>
+
+<script>
+(function(){
+  var run=document.getElementById('run');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){run.classList.add('go');io.disconnect();}},{threshold:.3});
+    io.observe(run);
+  } else { run.classList.add('go'); }
+})();
+</script>
+</body>
+</html>
